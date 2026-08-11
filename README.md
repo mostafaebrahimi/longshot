@@ -62,6 +62,35 @@ npx @puppeteer/browsers install chrome@stable --path /tmp/browsers
 CHROME_BIN=/tmp/browsers/chrome/linux-*/chrome-linux64/chrome node tools/smoke-test.mjs
 ```
 
+## Releases
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) packs both stores, lints
+the Firefox package, and runs the smoke test on every push and pull request.
+
+[`.github/workflows/release.yml`](.github/workflows/release.yml) does the same
+and then ships. Tag the commit and both stores get the version:
+
+```sh
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+The tag has to match `manifest.json` or the run stops before it builds anything,
+and the smoke test has to pass before anything is uploaded. Run the workflow by
+hand to publish to one store only, or to build a release without publishing.
+
+Publishing needs six repository secrets. A missing pair skips that store rather
+than failing the run, so one store can go live before the other is set up.
+
+| Secret | Where it comes from |
+| --- | --- |
+| `CWS_EXTENSION_ID` | the item id in the Chrome Web Store developer dashboard |
+| `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` | an OAuth client for the Chrome Web Store API |
+| `AMO_JWT_ISSUER`, `AMO_JWT_SECRET` | <https://addons.mozilla.org/developers/addon/api/key/> |
+
+AMO can only add versions to an add-on that already exists, so the first Firefox
+upload has to go through the submission form by hand. Chrome uploads publish
+themselves; drop `--auto-publish` from the workflow to leave them as drafts.
+
 ## Published pages
 
 The privacy policy the Chrome Web Store listing points at is live at

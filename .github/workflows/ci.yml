@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Pack both stores
+        run: node tools/build.mjs --target=all
+
+      - name: Lint the Firefox package
+        run: npx --yes web-ext@10 lint --source-dir dist/package-firefox
+
+      # Branded Chrome refuses --load-extension, so the smoke test needs a
+      # Chrome for Testing build. The install prints "chrome@<version> <path>".
+      - name: Install Chrome for Testing
+        run: |
+          npx --yes @puppeteer/browsers install chrome@stable --path "$RUNNER_TEMP/browsers" \
+            | tee "$RUNNER_TEMP/chrome.txt"
+          echo "CHROME_BIN=$(tail -n1 "$RUNNER_TEMP/chrome.txt" | cut -d' ' -f2)" >> "$GITHUB_ENV"
+
+      - name: Capture a fixture page and check the stitched result
+        run: node tools/smoke-test.mjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: dist/*.zip
+          if-no-files-found: error

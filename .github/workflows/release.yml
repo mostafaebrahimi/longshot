@@ -1,0 +1,118 @@
+name: Release
+
+# Tag a release and both stores get the new version:
+#
+#   git tag v1.0.1 && git push origin v1.0.1
+#
+# The tag has to match manifest.json. Use the manual run to publish to one
+# store only, or to build a release without publishing anywhere.
+#
+# Repository secrets it expects (a missing pair skips that store, so you can
+# ship to Chrome before AMO is set up, or the other way round):
+#
+#   CWS_EXTENSION_ID     Chrome Web Store item id
+#   CWS_CLIENT_ID        OAuth client from the Google Cloud console
+#   CWS_CLIENT_SECRET
+#   CWS_REFRESH_TOKEN
+#   AMO_JWT_ISSUER       addons.mozilla.org/developers/addon/api/key/
+#   AMO_JWT_SECRET
+#
+# AMO needs the add-on to exist before the API can add versions to it, so the
+# very first Firefox upload has to go through the submission form by hand.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      stores:
+        description: Where to publish
+        type: choice
+        default: both
+        options: [both, chrome, firefox, none]
+
+jobs:
+  release:
+    name: Build, publish, and attach the packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      STORES: ${{ inputs.stores || 'both' }}
+      # chrome-webstore-upload-cli reads these four straight from the environment.
+      EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+      CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+      REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+      AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Read the version, and check the tag agrees with it
+        run: |
+          version=$(node -p "require('./manifest.json').version")
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag="${GITHUB_REF_NAME#v}"
+            if [ "$tag" != "$version" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match manifest.json version $version"
+              exit 1
+            fi
+          fi
+
+      - name: Pack both stores
+        run: node tools/build.mjs --target=all
+
+      - name: Lint the Firefox package
+        run: npx --yes web-ext@10 lint --source-dir dist/package-firefox
+
+      - name: Install Chrome for Testing
+        run: |
+          npx --yes @puppeteer/browsers install chrome@stable --path "$RUNNER_TEMP/browsers" \
+            | tee "$RUNNER_TEMP/chrome.txt"
+          echo "CHROME_BIN=$(tail -n1 "$RUNNER_TEMP/chrome.txt" | cut -d' ' -f2)" >> "$GITHUB_ENV"
+
+      # Nothing reaches a store before the capture has been proven to still work.
+      - name: Capture a fixture page and check the stitched result
+        run: node tools/smoke-test.mjs
+
+      - name: Publish to the Chrome Web Store
+        if: ${{ (env.STORES == 'both' || env.STORES == 'chrome') && env.CLIENT_ID != '' }}
+        run: |
+          npx --yes chrome-webstore-upload-cli@3 upload \
+            --source "dist/longshot-${VERSION}.zip" \
+            --auto-publish
+
+      # A listed signing run uploads the version and hands it to AMO review.
+      - name: Publish to Firefox Add-ons
+        if: ${{ (env.STORES == 'both' || env.STORES == 'firefox') && env.AMO_JWT_ISSUER != '' }}
+        run: |
+          npx --yes web-ext@10 sign \
+            --channel listed \
+            --source-dir dist/package-firefox \
+            --artifacts-dir dist/amo \
+            --api-key "$AMO_JWT_ISSUER" \
+            --api-secret "$AMO_JWT_SECRET"
+
+      - name: Attach both packages to a GitHub release
+        if: ${{ github.ref_type == 'tag' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/longshot-${VERSION}.zip" \
+            "dist/longshot-${VERSION}-firefox.zip" \
+            --title "Longshot $VERSION" \
+            --generate-notes
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: dist/*.zip
+          if-no-files-found: error
