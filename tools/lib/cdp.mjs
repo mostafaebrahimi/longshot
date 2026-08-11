@@ -159,7 +159,19 @@ export async function attachToWorker(pipe) {
     (t) => t.type === "service_worker" && t.url.includes("service-worker.js"),
     { timeoutMs: 25000, label: "the extension service worker" }
   );
-  return { session: await pipe.attach(target.targetId), extensionId: new URL(target.url).host };
+  const session = await pipe.attach(target.targetId);
+
+  // The worker target exists a little before Chrome binds the extension API
+  // namespaces onto its global. Locally that gap closes before anything can
+  // observe it; on a cold CI runner it is wide enough to evaluate inside, and
+  // the first chrome.tabs call then fails on an undefined namespace.
+  const started = Date.now();
+  while (!(await session.eval(`typeof chrome?.tabs?.query === "function"`).catch(() => false))) {
+    if (Date.now() - started > 15000) throw new Error("Timed out waiting for the extension APIs");
+    await sleep(100);
+  }
+
+  return { session, extensionId: new URL(target.url).host };
 }
 
 /**
