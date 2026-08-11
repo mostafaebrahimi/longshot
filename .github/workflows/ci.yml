@@ -31,6 +31,10 @@ jobs:
             | tee "$RUNNER_TEMP/chrome.txt"
           echo "CHROME_BIN=$(tail -n1 "$RUNNER_TEMP/chrome.txt" | cut -d' ' -f2)" >> "$GITHUB_ENV"
 
+      # The smoke test proves the PDF export by parsing it with an outside reader.
+      - name: Install poppler-utils
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
       - name: Capture a fixture page and check the stitched result
         # The runner image forbids unprivileged user namespaces, so Chrome's
         # own sandbox cannot start. The job is already the isolation boundary.
