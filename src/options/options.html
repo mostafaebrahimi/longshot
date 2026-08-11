@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Longshot settings</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="head">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <path d="M3 9h18M8 3v18" opacity=".45" />
+            <path d="M12 12.5v4.5m0 0 2-2m-2 2-2-2" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <h1>Longshot</h1>
+          <p class="eyebrow">full page capture · settings</p>
+        </div>
+      </header>
+
+      <section class="welcome" id="welcome" hidden>
+        <h2>You're set up.</h2>
+        <p>
+          Open any page and press <kbd id="welcome-shortcut">Alt+Shift+P</kbd>, or click the
+          Longshot icon in the toolbar. The page scrolls itself, every screen is stitched into one
+          image, and the editor opens with it ready to crop, annotate, and save.
+        </p>
+        <p class="quiet">
+          Nothing is uploaded. Screenshots are stitched inside your browser and only leave it when
+          you save them.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="eyebrow">Capture</h2>
+
+        <label class="row">
+          <span class="label">
+            Pre-scroll the page first
+            <small>Runs one quick pass so lazy-loaded images appear in the shot. Slower, but far fewer blank gaps.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="preScroll" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Hide sticky headers and floating bars
+            <small>Keeps navigation bars and cookie banners from repeating down the whole screenshot.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="hideFixed" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Pause animations
+            <small>Freezes CSS animations during capture. Leave off if a page reveals content as you scroll.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="freezeMotion" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Show progress on the page
+            <small>A small card in the corner with a cancel button. It never appears in the screenshot.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="showOverlay" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Wait after each scroll
+            <small>Give slow pages more time to settle before the next screen is taken.</small>
+          </span>
+          <span class="control">
+            <input type="range" id="settleMs" min="0" max="1000" step="10" />
+            <span class="num" id="settleMs-value">130 ms</span>
+          </span>
+        </label>
+      </section>
+
+      <section>
+        <h2 class="eyebrow">Output</h2>
+
+        <div class="row">
+          <span class="label">
+            Save as
+            <small>PDF is written straight from the screenshot — no printing dialog.</small>
+          </span>
+          <span class="control">
+            <div class="chips" id="format" role="group" aria-label="Save as">
+              <button type="button" data-value="png" aria-pressed="true">PNG</button>
+              <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
+              <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
+            </div>
+          </span>
+        </div>
+
+        <label class="row" id="row-quality">
+          <span class="label">
+            JPG quality
+            <small>Lower means a smaller file with more compression artefacts.</small>
+          </span>
+          <span class="control">
+            <input type="range" id="jpegQuality" min="40" max="100" step="1" />
+            <span class="num" id="jpegQuality-value">92</span>
+          </span>
+        </label>
+
+        <label class="row" id="row-pdf">
+          <span class="label">
+            PDF pages
+            <small>One long page keeps the screenshot intact; paper sizes slice it for printing.</small>
+          </span>
+          <span class="control">
+            <select id="pdfPageMode">
+              <option value="single">One long page</option>
+              <option value="a4">A4 pages</option>
+              <option value="letter">Letter pages</option>
+            </select>
+          </span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Image scale
+            <small>Shrink the saved file. 100% keeps every captured pixel.</small>
+          </span>
+          <span class="control">
+            <input type="range" id="scale" min="25" max="100" step="5" />
+            <span class="num" id="scale-value">100%</span>
+          </span>
+        </label>
+
+        <div class="row">
+          <span class="label">
+            File name
+            <small id="filename-preview">Preview</small>
+          </span>
+          <span class="control">
+            <input type="text" id="filename" spellcheck="false" />
+          </span>
+        </div>
+
+        <div class="tokens" id="tokens"></div>
+
+        <label class="row">
+          <span class="label">
+            Open the editor after capture
+            <small>Turn this off to save the file straight to your downloads folder and stay on the page.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="openEditor" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Download without asking
+            <small>Skips the “Save as” dialog and writes straight to your downloads folder.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="autoDownload" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            Copy to the clipboard too
+            <small>Puts a PNG on the clipboard as soon as the capture finishes.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="copyOnCapture" /><span></span></span>
+        </label>
+      </section>
+
+      <section>
+        <h2 class="eyebrow">Interface</h2>
+        <div class="row">
+          <span class="label">Theme</span>
+          <span class="control">
+            <div class="chips" id="theme" role="group" aria-label="Theme">
+              <button type="button" data-value="system" aria-pressed="true">System</button>
+              <button type="button" data-value="dark" aria-pressed="false">Dark</button>
+              <button type="button" data-value="light" aria-pressed="false">Light</button>
+            </div>
+          </span>
+        </div>
+        <div class="row">
+          <span class="label">
+            Keyboard shortcuts
+            <small id="shortcut-list">—</small>
+          </span>
+          <span class="control">
+            <button class="btn" id="open-shortcuts">Change shortcuts</button>
+          </span>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="eyebrow">Privacy</h2>
+        <p class="prose">
+          Longshot works entirely on your machine. It has no servers, no accounts, and no analytics.
+          Screenshots are stitched in the editor tab and stay there until you save or copy them.
+          Your settings sync through your own Chrome profile.
+        </p>
+        <p class="prose quiet">
+          The extension can only read a page after you start a capture on it — by clicking the
+          toolbar icon, using a shortcut, or picking it from the right-click menu.
+        </p>
+      </section>
+
+      <footer class="foot">
+        <span class="eyebrow" id="version"></span>
+        <span class="grow"></span>
+        <button class="btn-ghost" id="reset">Reset all settings</button>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

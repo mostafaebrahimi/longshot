@@ -1,0 +1,204 @@
+body {
+  width: 340px;
+  background: var(--ink-800);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--amber-500);
+  background: var(--amber-glow);
+  border: 1px solid color-mix(in srgb, var(--amber-500) 30%, transparent);
+}
+
+.wordmark {
+  display: grid;
+  gap: 1px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+
+.icon {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: var(--fg-faint);
+}
+.icon:hover {
+  color: var(--fg);
+  background: var(--ink-600);
+}
+
+.notice {
+  display: grid;
+  gap: 2px;
+  margin: 12px 14px 0;
+  padding: 10px 11px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--fg-dim);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border-radius: var(--radius-sm);
+}
+.notice strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+main {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+/* The primary action carries the product's signature: a ladder of rungs that
+   fills top to bottom, the same motif the in-page progress card uses. */
+.capture {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 13px 13px 14px;
+  text-align: left;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--amber-500) 45%, var(--line));
+  background: linear-gradient(180deg, var(--ink-600), var(--ink-700));
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.capture:hover {
+  border-color: var(--amber-500);
+  background: linear-gradient(180deg, var(--amber-glow), var(--ink-700));
+}
+.capture:active {
+  transform: translateY(1px);
+}
+.capture.secondary {
+  border-color: var(--line);
+  background: var(--ink-700);
+}
+.capture.secondary:hover {
+  border-color: var(--fg-faint);
+  background: var(--ink-600);
+}
+.capture[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.capture-text {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.capture-text strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.capture-text .sub {
+  font-size: 11.5px;
+  color: var(--fg-dim);
+  line-height: 1.3;
+}
+
+.ladder {
+  display: grid;
+  gap: 2px;
+  width: 16px;
+  flex: none;
+}
+.ladder i {
+  height: 3px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--amber-500) 32%, var(--line));
+}
+.capture:hover .ladder i {
+  animation: fill 900ms var(--ease) forwards;
+}
+.ladder i:nth-child(1) { animation-delay: 0ms; }
+.ladder i:nth-child(2) { animation-delay: 60ms; }
+.ladder i:nth-child(3) { animation-delay: 120ms; }
+.ladder i:nth-child(4) { animation-delay: 180ms; }
+.ladder i:nth-child(5) { animation-delay: 240ms; }
+.ladder i:nth-child(6) { animation-delay: 300ms; }
+.ladder i:nth-child(7) { animation-delay: 360ms; }
+.ladder i:nth-child(8) { animation-delay: 420ms; }
+@keyframes fill {
+  to {
+    background: var(--amber-500);
+  }
+}
+
+.frame {
+  flex: none;
+  width: 16px;
+  height: 13px;
+  border: 2px solid var(--line);
+  border-radius: 3px;
+}
+.capture.secondary:hover .frame {
+  border-color: var(--fg-dim);
+}
+
+.strip {
+  display: grid;
+  gap: 2px;
+  padding: 4px 14px 10px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 32px;
+  font-size: 12.5px;
+  color: var(--fg-dim);
+  cursor: pointer;
+}
+.row span:first-child {
+  user-select: none;
+}
+
+.foot {
+  border-bottom: 0;
+  border-top: 1px solid var(--line-soft);
+  padding: 9px 14px;
+  gap: 8px;
+}
+.link {
+  font-size: 11.5px;
+  color: var(--fg-dim);
+  padding: 0;
+}
+.link:hover {
+  color: var(--amber-500);
+}
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--line);
+}
+.spacer {
+  flex: 1;
+}

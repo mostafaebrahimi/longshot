@@ -1,0 +1,299 @@
+/* Longshot design tokens.
+   Direction: darkroom instrument — cool graphite bodies, warm safelight amber,
+   monospaced numerals for anything measured. */
+
+:root {
+  /* surfaces */
+  --ink-900: #101216;
+  --ink-800: #16181d;
+  --ink-700: #1c1f26;
+  --ink-600: #23272f;
+  --line: #2c313a;
+  --line-soft: #23262d;
+
+  /* text */
+  --fg: #e8eaed;
+  --fg-dim: #a3a9b4;
+  --fg-faint: #6f7681;
+
+  /* safelight accent */
+  --amber-400: #ffa552;
+  --amber-500: #ff8a3d;
+  --amber-600: #ec6f22;
+  --amber-glow: rgba(255, 138, 61, 0.16);
+
+  /* status */
+  --good: #4fbf8b;
+  --warn: #f2c14e;
+  --bad: #ff6b5e;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+  --shadow-3: 0 24px 60px -20px rgba(0, 0, 0, 0.75);
+
+  --font-ui: ui-sans-serif, "Segoe UI Variable Text", "Segoe UI", -apple-system,
+    BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono",
+    Consolas, "DejaVu Sans Mono", monospace;
+
+  --dur: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --ink-900: #f6f4f1;
+  --ink-800: #fbfaf8;
+  --ink-700: #ffffff;
+  --ink-600: #f1eee9;
+  --line: #ddd8d0;
+  --line-soft: #e8e4dd;
+  --fg: #1b1d21;
+  --fg-dim: #5c626c;
+  --fg-faint: #8b919b;
+  --amber-glow: rgba(236, 111, 34, 0.12);
+  --amber-500: #e0691f;
+  --amber-400: #c95c17;
+  --amber-600: #b04f11;
+  --shadow-1: 0 1px 2px rgba(30, 24, 16, 0.08);
+  --shadow-2: 0 8px 24px -10px rgba(30, 24, 16, 0.2);
+  --shadow-3: 0 24px 60px -24px rgba(30, 24, 16, 0.3);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Flex and grid containers override the UA rule for [hidden], so restate it. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fg);
+  background: var(--ink-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Film-edge micro label: the utility voice of the whole product. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--ink-600);
+  color: var(--fg);
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--line-soft);
+  border-color: var(--fg-faint);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--amber-500);
+  border-color: var(--amber-500);
+  color: #1a0d03;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: var(--amber-400);
+  border-color: var(--amber-400);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-dim);
+}
+.btn-ghost:hover {
+  background: var(--ink-600);
+  color: var(--fg);
+  border-color: transparent;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--ink-600);
+  color: var(--fg-dim);
+  white-space: nowrap;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+}
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.switch span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--ink-600);
+  border: 1px solid var(--line);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  pointer-events: none;
+}
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--fg-faint);
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.switch input:checked + span {
+  background: var(--amber-glow);
+  border-color: var(--amber-500);
+}
+.switch input:checked + span::after {
+  transform: translateX(14px);
+  background: var(--amber-500);
+}
+.switch input:focus-visible + span {
+  outline: 2px solid var(--amber-500);
+  outline-offset: 2px;
+}
+
+/* Segmented chips */
+.chips {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.chips button {
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.chips button:hover {
+  color: var(--fg);
+}
+.chips button[aria-pressed="true"] {
+  background: var(--amber-500);
+  color: #1a0d03;
+  font-weight: 600;
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  font: inherit;
+  height: 30px;
+  padding: 0 8px;
+  color: var(--fg);
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+select:hover,
+input[type="text"]:hover,
+input[type="number"]:hover {
+  border-color: var(--fg-faint);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  background: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--amber-500);
+  border: 2px solid var(--ink-800);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

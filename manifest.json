@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Longshot — Full Page Screenshot",
+  "version": "1.0.0",
+  "description": "Capture an entire web page in one click, then crop, annotate, and save it as PNG, JPG, or PDF. No account, no uploads.",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "Longshot — capture this page",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "options_page": "src/options/options.html",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "downloads",
+    "contextMenus",
+    "clipboardWrite"
+  ],
+  "commands": {
+    "capture-full-page": {
+      "suggested_key": { "default": "Alt+Shift+P", "mac": "Alt+Shift+P" },
+      "description": "Capture the full page"
+    },
+    "capture-visible": {
+      "suggested_key": { "default": "Alt+Shift+V", "mac": "Alt+Shift+V" },
+      "description": "Capture the visible area"
+    }
+  },
+  "offline_enabled": true
+}

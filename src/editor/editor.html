@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Longshot</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6">
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <path d="M3 9h18M8 3v18" opacity=".45" />
+            <path d="M12 12.5v4.5m0 0 2-2m-2 2-2-2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="file">
+          <input id="filename" type="text" spellcheck="false" aria-label="File name" />
+          <span class="dims num" id="dims">—</span>
+        </div>
+
+        <div class="grow"></div>
+
+        <div class="zoom">
+          <button class="btn-ghost sq" id="zoom-out" title="Zoom out (−)">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 12h14" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn-ghost zoom-value num" id="zoom-value" title="Reset to 100%">100%</button>
+          <button class="btn-ghost sq" id="zoom-in" title="Zoom in (+)">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn-ghost" id="zoom-fit" title="Fit to window (0)">Fit</button>
+        </div>
+
+        <span class="sep"></span>
+
+        <button class="btn" id="copy">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>
+          Copy
+        </button>
+
+        <div class="chips" id="format" role="group" aria-label="Save as">
+          <button type="button" data-value="png" aria-pressed="true">PNG</button>
+          <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
+          <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
+        </div>
+
+        <button class="btn btn-primary" id="save">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4" stroke-linecap="round"/><path d="M4 18v2h16v-2" stroke-linecap="round"/></svg>
+          Save
+        </button>
+
+        <button class="btn-ghost sq" id="open-settings" title="Settings">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div class="body">
+        <nav class="tools" id="tools" aria-label="Tools"></nav>
+
+        <div class="stage-wrap">
+          <div class="inspector" id="inspector" hidden>
+            <div class="swatches" id="swatches" role="group" aria-label="Colour"></div>
+            <span class="sep tall"></span>
+            <label class="ctl">
+              <span class="eyebrow" id="size-label">Width</span>
+              <input type="range" id="size" min="1" max="40" step="1" />
+              <span class="num" id="size-value">4</span>
+            </label>
+            <span class="sep tall"></span>
+            <button class="btn-ghost" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+            <button class="btn-ghost" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+            <button class="btn-ghost danger" id="delete" title="Delete (Del)">Delete</button>
+            <div class="grow"></div>
+            <div class="crop-actions" id="crop-actions" hidden>
+              <span class="eyebrow">Crop</span>
+              <button class="btn" id="crop-apply">Apply</button>
+              <button class="btn-ghost" id="crop-reset">Reset</button>
+            </div>
+          </div>
+
+          <main class="stage" id="stage">
+            <canvas id="view"></canvas>
+            <textarea id="text-input" spellcheck="false" hidden></textarea>
+
+            <div class="progress" id="progress">
+              <div class="progress-card">
+                <div class="ladder" id="ladder"></div>
+                <div>
+                  <div class="progress-title" id="progress-title">Capturing page</div>
+                  <div class="eyebrow" id="progress-count">waiting for the first tile</div>
+                </div>
+                <button class="btn" id="progress-cancel">Cancel</button>
+              </div>
+            </div>
+
+            <div class="failure" id="failure" hidden>
+              <div class="failure-card">
+                <div class="eyebrow">Capture stopped</div>
+                <p id="failure-message"></p>
+                <button class="btn" id="failure-close">Close this tab</button>
+              </div>
+            </div>
+          </main>
+
+          <aside class="rail" id="rail" hidden aria-hidden="true">
+            <canvas id="rail-canvas"></canvas>
+            <div class="rail-view" id="rail-view"></div>
+          </aside>
+        </div>
+      </div>
+
+      <footer class="statusbar">
+        <span class="eyebrow" id="status-left">Ready</span>
+        <div class="grow"></div>
+        <span class="eyebrow hints">
+          <kbd>V</kbd> select <kbd>C</kbd> crop <kbd>A</kbd> arrow <kbd>T</kbd> text
+          <kbd>B</kbd> blur <kbd>Space</kbd> pan <kbd>Ctrl</kbd>+<kbd>S</kbd> save
+        </span>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script type="module" src="editor.js"></script>
+  </body>
+</html>

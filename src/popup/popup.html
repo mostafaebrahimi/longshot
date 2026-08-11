@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Longshot</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="3" y="3" width="18" height="18" rx="4" />
+          <path d="M3 9h18M8 3v18" opacity=".45" />
+          <path d="M12 12.5v4.5m0 0 2-2m-2 2-2-2" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="wordmark">
+        Longshot
+        <span class="eyebrow">full page capture</span>
+      </div>
+      <button class="btn-ghost icon" id="open-settings" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="3.2" />
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 3 15a1.7 1.7 0 0 0-1.55-1H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 7 4.6h.08A1.7 1.7 0 0 0 8.6 3.05V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.08a1.7 1.7 0 0 0 1.55 1.52H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" transform="translate(1.5 1.5) scale(.86)" />
+        </svg>
+      </button>
+    </header>
+
+    <div id="blocked" class="notice" hidden>
+      <strong>Chrome blocks extensions here.</strong>
+      <span id="blocked-detail">Open a regular http:// or https:// page and try again.</span>
+    </div>
+
+    <main>
+      <button class="capture" id="capture-full">
+        <span class="ladder" aria-hidden="true"
+          ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+        ></span>
+        <span class="capture-text">
+          <strong>Capture full page</strong>
+          <span class="sub">Scrolls the page and stitches every screen</span>
+        </span>
+        <kbd id="kbd-full">Alt ⇧ P</kbd>
+      </button>
+
+      <button class="capture secondary" id="capture-visible">
+        <span class="frame" aria-hidden="true"></span>
+        <span class="capture-text">
+          <strong>Capture visible area</strong>
+          <span class="sub">Just what is on screen right now</span>
+        </span>
+        <kbd id="kbd-visible">Alt ⇧ V</kbd>
+      </button>
+    </main>
+
+    <section class="strip">
+      <div class="row">
+        <span class="eyebrow">Save as</span>
+        <div class="chips" id="format" role="group" aria-label="Output format">
+          <button type="button" data-value="png" aria-pressed="true">PNG</button>
+          <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
+          <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
+        </div>
+      </div>
+      <label class="row">
+        <span>Open the editor after capture</span>
+        <span class="switch"><input type="checkbox" id="openEditor" /><span></span></span>
+      </label>
+      <label class="row">
+        <span>Download without asking</span>
+        <span class="switch"><input type="checkbox" id="autoDownload" /><span></span></span>
+      </label>
+    </section>
+
+    <footer class="bar foot">
+      <button class="link" id="open-shortcuts">Change shortcuts</button>
+      <span class="dot"></span>
+      <button class="link" id="open-settings-2">All settings</button>
+      <span class="spacer"></span>
+      <span class="eyebrow" id="version"></span>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
