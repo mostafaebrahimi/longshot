@@ -1,7 +1,9 @@
+import { IS_GECKO, SHORTCUTS_URL, labelBrowser } from "../shared/env.js";
 import { getSettings, setSettings, applyTheme } from "../shared/settings.js";
 
 const $ = (id) => document.getElementById(id);
-const RESTRICTED = /^(chrome|edge|brave|opera|vivaldi|about|devtools|view-source|chrome-extension):/i;
+const RESTRICTED =
+  /^(chrome|edge|brave|opera|vivaldi|about|devtools|view-source|chrome-extension|moz-extension):/i;
 const WEBSTORE = /^https:\/\/(chrome\.google\.com\/webstore|chromewebstore\.google\.com)/i;
 
 let settings = null;
@@ -11,6 +13,7 @@ init();
 async function init() {
   settings = await getSettings();
   applyTheme(settings.theme);
+  labelBrowser();
 
   $("version").textContent = `v${chrome.runtime.getManifest().version}`;
   paintFormat(settings.format);
@@ -44,7 +47,7 @@ async function init() {
     });
   }
   $("open-shortcuts").addEventListener("click", () => {
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+    chrome.tabs.create({ url: SHORTCUTS_URL });
     window.close();
   });
 }
@@ -65,6 +68,14 @@ async function guardRestricted() {
   const url = tab?.url || "";
   if (url.startsWith("file:")) {
     $("blocked").hidden = false;
+    if (IS_GECKO) {
+      $("blocked").querySelector("strong").textContent = "Firefox blocks local files.";
+      $("blocked-detail").textContent =
+        "Firefox does not let extensions read pages served from your disk. Open the page over http:// or https:// instead.";
+      $("capture-full").disabled = true;
+      $("capture-visible").disabled = true;
+      return;
+    }
     $("blocked").querySelector("strong").textContent = "Local files need one more click.";
     $("blocked-detail").textContent =
       "Turn on “Allow access to file URLs” on the extension’s details page to capture files from your disk.";

@@ -60,4 +60,5 @@ same release and the date at the top changes with it. Version history is in
 
 ## Contact
 
-Questions or a security report: open an issue on the project repository.
+Questions or a security report: use the Support tab on the Longshot listing in the
+Chrome Web Store.

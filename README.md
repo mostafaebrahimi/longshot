@@ -33,8 +33,16 @@ unpacked**, and pick the repository root.
 ## Build a store package
 
 ```sh
-node tools/build.mjs      # validates, then writes dist/longshot-<version>.zip
+node tools/build.mjs                    # Chrome Web Store
+node tools/build.mjs --target=firefox   # addons.mozilla.org
+node tools/build.mjs --target=all       # both
 ```
+
+Each target writes `dist/longshot-<version>[-firefox].zip` plus the unpacked
+`dist/package[-firefox]/` it was zipped from. Both ship identical code — only the
+manifest differs, and only where it has to (Firefox runs the same module as an
+event page and needs its own add-on id). Everything else is handled at runtime by
+`src/shared/compat.js`.
 
 The build refuses to package inline scripts, remote code, missing manifest
 references, or host permissions — the things store review sends back.
@@ -53,6 +61,20 @@ build:
 npx @puppeteer/browsers install chrome@stable --path /tmp/browsers
 CHROME_BIN=/tmp/browsers/chrome/linux-*/chrome-linux64/chrome node tools/smoke-test.mjs
 ```
+
+## Published pages
+
+The privacy policy the Chrome Web Store listing points at is live at
+**<https://longshot-privacy.surge.sh>**, served by [surge.sh](https://surge.sh)
+straight from `docs/` — `index.html` plus the icon, no build step. `docs/CNAME`
+pins the domain, so updating is one command from the repository root:
+
+```sh
+npx surge ./docs
+```
+
+Keep `store/PRIVACY.md` in step with `docs/index.html`, and move the "Last
+updated" date whenever the substance changes.
 
 ## Store assets
 
@@ -92,7 +114,8 @@ and page zoom correct without guessing.
 | `src/content/` | The in-page agent: scroll planning, sticky handling, progress card |
 | `src/editor/` | Stitching, annotation model, rendering, export |
 | `src/popup/`, `src/options/` | The two surfaces you click |
-| `src/shared/` | Settings, file name templates, the PDF writer |
+| `src/shared/` | Settings, file name templates, the PDF writer, browser compat shims |
+| `docs/` | The published privacy policy page (see below) |
 | `tools/` | Icons, store assets, build, smoke test |
 | `store/` | Listing copy, privacy policy, generated store images |
 

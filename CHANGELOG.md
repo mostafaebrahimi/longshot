@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Cross-browser support: `src/shared/compat.js` and `src/shared/env.js` let the
+  same code run on Firefox, and `tools/build.mjs --target=firefox` emits an
+  AMO-ready package with a Gecko manifest
+- Privacy policy published at https://longshot-privacy.surge.sh, served from
+  `docs/` (redeploy with `npx surge ./docs`)
+- Editor fits captures to the stage width instead of the whole height, so a long
+  screenshot opens readable rather than shrunk to a sliver
+- Page rail sizes itself to the capture's aspect ratio
+- File names collapse runs of dashes, spaces, and underscores
+
 ## 1.0.0 — 2026-08-11
 
 First release.

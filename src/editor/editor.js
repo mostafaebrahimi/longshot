@@ -1,6 +1,7 @@
 /** Longshot editor: receives the tile stream, stitches it, and hosts the
  *  annotation tools and exporters. */
 
+import "../shared/compat.js";
 import { applyTheme, getSettings, setSettings, resolveFilename } from "../shared/settings.js";
 import {
   createDoc,

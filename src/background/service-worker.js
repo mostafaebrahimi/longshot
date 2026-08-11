@@ -6,9 +6,11 @@
  * never buffered here — the editor draws them as they arrive, so a 40-tile page
  * costs the worker almost nothing.
  */
+import { BROWSER_NAME } from "../shared/env.js";
 import { DEFAULTS, getSettings } from "../shared/settings.js";
 
-const AGENT_FILE = "src/content/capture.js";
+// compat.js first: it aliases `chrome` to `browser` on Firefox.
+const AGENT_FILES = ["src/shared/compat.js", "src/content/capture.js"];
 const RESTRICTED =
   /^(chrome|edge|brave|opera|vivaldi|about|devtools|view-source|chrome-extension|moz-extension):/i;
 const WEBSTORE = /^https:\/\/(chrome\.google\.com\/webstore|chromewebstore\.google\.com)/i;
@@ -124,7 +126,7 @@ async function begin(tab, mode) {
 async function runCapture(tab, mode, session) {
   if (!tab.url || RESTRICTED.test(tab.url) || WEBSTORE.test(tab.url)) {
     throw new Error(
-      "Chrome blocks extensions on this page. Try it on a normal http:// or https:// site."
+      `${BROWSER_NAME} blocks extensions on this page. Try it on a normal http:// or https:// site.`
     );
   }
 
@@ -139,7 +141,7 @@ async function runCapture(tab, mode, session) {
     maxPixels: settings.maxPixels,
   };
 
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: [AGENT_FILE] });
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: AGENT_FILES });
 
   const plan = await send(tab.id, { t: "longshot:prepare", opts });
   if (!plan.ok) throw new Error(plan.error || "Could not read this page.");
@@ -219,7 +221,7 @@ async function captureWithRetry(windowId, format, quality) {
       wait = Math.min(1200, wait * 1.5);
     }
   }
-  throw new Error("Chrome refused to take a screenshot of this tab.");
+  throw new Error(`${BROWSER_NAME} refused to take a screenshot of this tab.`);
 }
 
 async function send(tabId, message) {
@@ -262,7 +264,7 @@ function friendlyError(err, tab) {
   if (err && err.cancelled) return "Capture cancelled.";
   const raw = String((err && err.message) || err);
   if (/Cannot access|Extension manifest|blocked|Missing host permission/i.test(raw)) {
-    return `Chrome does not allow extensions to read ${hostOf(tab.url)}. Open the page on a regular site and try again.`;
+    return `${BROWSER_NAME} does not allow extensions to read ${hostOf(tab.url)}. Open the page on a regular site and try again.`;
   }
   if (/Receiving end does not exist|message port closed/i.test(raw)) {
     return "The page reloaded during the capture. Reload it and try again.";

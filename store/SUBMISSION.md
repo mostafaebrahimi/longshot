@@ -23,8 +23,8 @@ You also need, one time only:
 - The **$5 one-time registration fee**, paid at first sign-in to the dashboard.
 - A **verified contact email** on the developer account. Google will not publish
   without it: Account → Contact email → verify.
-- A **public privacy policy URL**. `docs/index.html` in this repo is ready to
-  host; see step 5.
+- A **public privacy policy URL**. Already live at
+  <https://longshot-privacy.surge.sh>; see step 5 for how to update it.
 
 ---
 
@@ -92,27 +92,36 @@ Paste the privacy policy URL from step 5 into **Privacy policy URL**.
 
 ---
 
-## 5 · Host the privacy policy
+## 5 · Privacy policy — already hosted
 
-The store requires a public URL. `docs/index.html` is a self-contained page
-ready for any static host. Two easy routes:
+The policy is live at:
 
-**GitHub Pages** — create a repository, push, then Settings → Pages → Source:
-*Deploy from a branch* → `main` / `/docs`. Your URL becomes
-`https://<user>.github.io/<repo>/`.
+**<https://longshot-privacy.surge.sh>**
+
+Paste that into the **Privacy policy URL** field on the Privacy tab.
+
+It is served by [surge.sh](https://surge.sh) from the `docs/` folder of this
+repository — `docs/index.html` plus `docs/icon-128.png`, no build step and no
+dependencies. `docs/CNAME` pins the domain, so redeploying never needs the
+domain argument again.
+
+### Updating it later
+
+Edit `docs/index.html`, then from the repository root:
 
 ```sh
-git remote add origin git@github.com:<user>/<repo>.git
-git push -u origin main
+npx surge ./docs
 ```
 
-**Any static host** — drop the two files in `docs/` onto Netlify, Cloudflare
-Pages, or your own server. The page has no dependencies.
+Same URL, new content, live in a few seconds. Keep `store/PRIVACY.md` (the
+markdown copy) in step with the HTML, and move the "Last updated" date whenever
+the substance changes — Google re-checks the URL after publication, and a policy
+that contradicts the listing's data disclosures is a takedown risk.
 
-Check the URL loads in a private window before pasting it. A policy behind a
-login is treated as no policy.
-
----
+The surge account is under the email used at deploy time; the login is never
+shown publicly, and the URL contains no personal identifier. To move the page
+elsewhere later, host the same two files anywhere static and change the URL in
+the dashboard — nothing else references it.
 
 ## 6 · Submit
 

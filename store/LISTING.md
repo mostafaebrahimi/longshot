@@ -150,8 +150,14 @@ Certifications:
 - ☑ I do not use or transfer user data for purposes that are unrelated to my item's single purpose
 - ☑ I do not use or transfer user data to determine creditworthiness or for lending purposes
 
-**Privacy policy URL** — host `store/PRIVACY.md` somewhere public (GitHub Pages
-or the repository's rendered README works) and paste that URL.
+**Privacy policy URL**
+
+```
+https://longshot-privacy.surge.sh
+```
+
+Live now, served from `docs/` via surge.sh. Redeploy after edits with
+`npx surge ./docs` — see [SUBMISSION.md](SUBMISSION.md) § 5.
 
 ---
 

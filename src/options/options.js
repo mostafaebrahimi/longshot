@@ -1,3 +1,4 @@
+import { SHORTCUTS_URL, labelBrowser } from "../shared/env.js";
 import {
   DEFAULTS,
   getSettings,
@@ -16,6 +17,7 @@ init();
 async function init() {
   settings = await getSettings();
   applyTheme(settings.theme);
+  labelBrowser();
   $("version").textContent = `Longshot v${chrome.runtime.getManifest().version}`;
 
   if (new URLSearchParams(location.search).get("welcome")) $("welcome").hidden = false;
@@ -41,9 +43,7 @@ async function init() {
   loadShortcuts();
   syncConditional();
 
-  $("open-shortcuts").addEventListener("click", () =>
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
-  );
+  $("open-shortcuts").addEventListener("click", () => chrome.tabs.create({ url: SHORTCUTS_URL }));
   $("reset").addEventListener("click", async () => {
     await chrome.storage.sync.clear();
     toast("Settings reset");
