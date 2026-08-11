@@ -13,7 +13,7 @@
 import { spawn } from "node:child_process";
 import { mkdtemp, readFile, cp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -103,9 +103,12 @@ export async function launchWithExtension(root, { width = 1280, height = 800, qu
   const extDir = join(workdir, "ext");
   const profile = join(workdir, "profile");
 
+  // Match on the path relative to the root: an absolute filter would exclude
+  // everything whenever the checkout itself sits under a "dist" or ".git" path.
+  const SKIP = /^(node_modules|\.git|dist|store[/\\]screenshots)/;
   await cp(root, extDir, {
     recursive: true,
-    filter: (src) => !/(node_modules|\.git|dist|store\/screenshots)/.test(src),
+    filter: (src) => src === root || !SKIP.test(relative(root, src)),
   });
   const manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8"));
   manifest.host_permissions = ["<all_urls>"];
