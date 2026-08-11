@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Longshot — Privacy Policy</title>
+    <meta
+      name="description"
+      content="Privacy policy for Longshot, a Chrome extension that captures full page screenshots locally."
+    />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --panel: #f6f4f1;
+        --line: #e2ded7;
+        --fg: #1b1d21;
+        --dim: #5c626c;
+        --accent: #d2611a;
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101216;
+          --panel: #171a1f;
+          --line: #262b33;
+          --fg: #e8eaed;
+          --dim: #a3a9b4;
+          --accent: #ff8a3d;
+          color-scheme: dark;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 0 24px 96px;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.65 ui-sans-serif, "Segoe UI", system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 680px; margin: 0 auto; }
+      header {
+        display: flex; align-items: center; gap: 14px;
+        padding: 56px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 36px;
+      }
+      header img { width: 44px; height: 44px; border-radius: 11px; }
+      h1 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+      .eyebrow {
+        margin: 3px 0 0;
+        font-family: ui-monospace, "SF Mono", Consolas, monospace;
+        font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim);
+      }
+      h2 {
+        margin: 36px 0 10px; font-size: 16px; letter-spacing: -0.01em;
+        padding-top: 20px; border-top: 1px solid var(--line);
+      }
+      h2:first-of-type { border-top: 0; padding-top: 0; }
+      p { margin: 0 0 14px; color: var(--dim); }
+      strong { color: var(--fg); font-weight: 600; }
+      .lede { font-size: 17px; }
+      .callout {
+        padding: 16px 18px; border-radius: 10px; background: var(--panel);
+        border: 1px solid var(--line); margin: 0 0 8px;
+      }
+      .callout p:last-child { margin-bottom: 0; }
+      footer {
+        margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line);
+        font-size: 13px; color: var(--dim);
+      }
+      a { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="icon-128.png" alt="" />
+        <div>
+          <h1>Longshot — Privacy Policy</h1>
+          <p class="eyebrow">Last updated 11 August 2026</p>
+        </div>
+      </header>
+
+      <div class="callout">
+        <p>
+          <strong>Longshot collects nothing.</strong> It has no account, no server, no analytics,
+          and no code that makes a network request. Screenshots are built and stay inside your own
+          browser.
+        </p>
+      </div>
+
+      <h2>What Longshot handles, and where</h2>
+      <p>
+        <strong>Page pixels.</strong> When you start a capture, Longshot asks Chrome for images of
+        the visible part of the tab, one screen at a time, and draws them onto a canvas inside an
+        extension tab in your browser. That image lives in the memory of that tab. It is written to
+        disk only when you click Save, into the folder Chrome downloads to. Closing the tab
+        discards it.
+      </p>
+      <p>
+        <strong>Your settings.</strong> Output format, file name template, capture delay, theme, and
+        the annotation colour you last used are stored with Chrome's storage API in your Chrome
+        profile. With Chrome sync switched on, Google syncs them between your own devices the same
+        way it syncs bookmarks. The developer of Longshot has no access to them.
+      </p>
+      <p>
+        <strong>Clipboard.</strong> If you press Copy, the screenshot is placed on your system
+        clipboard. Nothing else touches it.
+      </p>
+
+      <h2>What Longshot can read</h2>
+      <p>
+        Longshot uses the <strong>activeTab</strong> permission. It can only read a page after you
+        explicitly start a capture on it — by clicking the toolbar icon, pressing a keyboard
+        shortcut, or choosing Longshot from the right-click menu. It has no standing access to any
+        website, cannot read pages in the background, and requests no host permissions for any
+        domain.
+      </p>
+      <p>
+        While a capture runs, Longshot temporarily scrolls the page and hides sticky or floating
+        elements so they do not repeat down the image. Both are undone when the capture ends.
+      </p>
+
+      <h2>Data sharing</h2>
+      <p>
+        There is none. No data is sold, transferred, or disclosed to any third party, because none
+        is collected in the first place.
+      </p>
+
+      <h2>Children</h2>
+      <p>
+        Longshot is a general-purpose utility. It is not directed at children and collects no
+        information from anyone, including children.
+      </p>
+
+      <h2>Changes</h2>
+      <p>
+        If a future version changes what data is handled, this policy is updated in the same release
+        and the date at the top changes with it.
+      </p>
+
+      <h2>Contact</h2>
+      <p>Questions or a security report: open an issue on the project repository.</p>
+
+      <footer>Longshot is free and open source, released under the MIT licence.</footer>
+    </main>
+  </body>
+</html>
