@@ -129,6 +129,9 @@ export async function launchWithExtension(root, { width = 1280, height = 800, qu
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-features=Translate,DialMediaRouteProvider",
+      // CI images that forbid unprivileged user namespaces need --no-sandbox
+      // here, or Chrome dies before the debugging pipe is up.
+      ...(process.env.CHROME_EXTRA_FLAGS || "").split(/\s+/).filter(Boolean),
       "about:blank",
     ],
     { stdio: ["ignore", "ignore", "pipe", "pipe", "pipe"] }

@@ -80,6 +80,10 @@ jobs:
 
       # Nothing reaches a store before the capture has been proven to still work.
       - name: Capture a fixture page and check the stitched result
+        # The runner image forbids unprivileged user namespaces, so Chrome's
+        # own sandbox cannot start. The job is already the isolation boundary.
+        env:
+          CHROME_EXTRA_FLAGS: --no-sandbox
         run: node tools/smoke-test.mjs
 
       - name: Publish to the Chrome Web Store

@@ -32,6 +32,10 @@ jobs:
           echo "CHROME_BIN=$(tail -n1 "$RUNNER_TEMP/chrome.txt" | cut -d' ' -f2)" >> "$GITHUB_ENV"
 
       - name: Capture a fixture page and check the stitched result
+        # The runner image forbids unprivileged user namespaces, so Chrome's
+        # own sandbox cannot start. The job is already the isolation boundary.
+        env:
+          CHROME_EXTRA_FLAGS: --no-sandbox
         run: node tools/smoke-test.mjs
 
       - uses: actions/upload-artifact@v4
