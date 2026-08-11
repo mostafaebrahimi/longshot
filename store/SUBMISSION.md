@@ -102,15 +102,15 @@ Paste that into the **Privacy policy URL** field on the Privacy tab.
 
 It is served by [surge.sh](https://surge.sh) from the `docs/` folder of this
 repository — `docs/index.html` plus `docs/icon-128.png`, no build step and no
-dependencies. `docs/CNAME` pins the domain, so redeploying never needs the
-domain argument again.
+dependencies. `docs/CNAME` records the domain, but the CLI still wants it
+spelled out on every deploy.
 
 ### Updating it later
 
 Edit `docs/index.html`, then from the repository root:
 
 ```sh
-npx surge ./docs
+npx surge ./docs longshot-privacy.surge.sh
 ```
 
 Same URL, new content, live in a few seconds. Keep `store/PRIVACY.md` (the

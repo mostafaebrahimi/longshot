@@ -74,7 +74,7 @@ A note on limits: Chrome cannot take screenshots of its own pages
 by the maximum size a browser canvas can hold; Longshot captures as much as fits
 and tells you when it had to stop short.
 
-Free, open source, no upsell.
+Free, with no accounts, no subscriptions, and no upsell.
 ```
 
 **Category**: Workflow & Planning
@@ -157,7 +157,7 @@ https://longshot-privacy.surge.sh
 ```
 
 Live now, served from `docs/` via surge.sh. Redeploy after edits with
-`npx surge ./docs` — see [SUBMISSION.md](SUBMISSION.md) § 5.
+`npx surge ./docs longshot-privacy.surge.sh` — see [SUBMISSION.md](SUBMISSION.md) § 5.
 
 ---
 

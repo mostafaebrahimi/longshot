@@ -66,11 +66,10 @@ CHROME_BIN=/tmp/browsers/chrome/linux-*/chrome-linux64/chrome node tools/smoke-t
 
 The privacy policy the Chrome Web Store listing points at is live at
 **<https://longshot-privacy.surge.sh>**, served by [surge.sh](https://surge.sh)
-straight from `docs/` — `index.html` plus the icon, no build step. `docs/CNAME`
-pins the domain, so updating is one command from the repository root:
+straight from `docs/` — `index.html` plus the icon, no build step. Updating is one command from the repository root:
 
 ```sh
-npx surge ./docs
+npx surge ./docs longshot-privacy.surge.sh
 ```
 
 Keep `store/PRIVACY.md` in step with `docs/index.html`, and move the "Last
@@ -121,4 +120,10 @@ and page zoom correct without guessing.
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+Proprietary — all rights reserved. See [LICENSE](LICENSE).
+
+This is not an open source project. Installing Longshot from an extension store
+lets you run it; it does not grant permission to copy, modify, or redistribute
+the code. (An extension's JavaScript is readable by anyone who installs it —
+Google's policy forbids obfuscating it — so the licence, not secrecy, is what
+governs reuse.)

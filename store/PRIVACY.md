@@ -58,6 +58,11 @@ If a future version changes what data is handled, this policy is updated in the
 same release and the date at the top changes with it. Version history is in
 `CHANGELOG.md`.
 
+## This page
+
+This policy page is static: it sets no cookies, runs no scripts, and loads
+nothing from anywhere else.
+
 ## Contact
 
 Questions or a security report: use the Support tab on the Longshot listing in the
