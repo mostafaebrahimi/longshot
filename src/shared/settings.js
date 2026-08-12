@@ -3,9 +3,11 @@
 export const DEFAULTS = {
   // Capture
   captureFormat: "png", // intermediate tile format: png | jpeg
+  captureScale: 1, // 1 = as displayed, 2 = zoom the page for twice the detail
   settleMs: 130, // wait after each scroll step
   preScroll: true, // run one fast pass first so lazy images load
   hideFixed: true, // hide sticky/fixed elements after the first tile
+  pageFrame: true, // keep the app frame (headers, sidebars) around an inner panel
   freezeMotion: false, // pause CSS animations while capturing
   showOverlay: true, // in-page progress card
   maxPixels: 260000000, // canvas safety ceiling (~260 MP)
@@ -14,6 +16,7 @@ export const DEFAULTS = {
   format: "png", // png | jpeg | pdf
   jpegQuality: 92,
   pdfPageMode: "single", // single | a4 | letter
+  pdfLossless: false, // deflate the pages instead of JPEG — sharper text, bigger file
   scale: 100, // downscale the stitched image, percent
   filename: "{title}-{date}", // template
   autoDownload: false,
@@ -21,6 +24,7 @@ export const DEFAULTS = {
   copyOnCapture: false,
 
   // Interface
+  language: "en", // en | fa | ar — see shared/i18n.js
   theme: "system", // system | dark | light
 };
 

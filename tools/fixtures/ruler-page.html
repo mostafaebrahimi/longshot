@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ruler — stitch fidelity</title>
+    <!-- Built to measure the join between tiles rather than to look like a page.
+         The background runs black to white over the whole height, so every row
+         has its own shade and any unpainted line shows up as a bright thread.
+         A red rule every 100px says whether the stitch swallowed or repeated
+         anything: 40 of them, evenly spaced, or the capture is wrong. -->
+    <style>
+      html, body { margin: 0; }
+      body { height: 4000px; background: linear-gradient(#000000, #ffffff); }
+      .tick { position: absolute; left: 0; right: 0; height: 2px; background: #ff0000; }
+    </style>
+  </head>
+  <body>
+    <script>
+      for (let y = 0; y < 4000; y += 100) {
+        const tick = document.createElement("div");
+        tick.className = "tick";
+        tick.style.top = `${y}px`;
+        document.body.appendChild(tick);
+      }
+    </script>
+  </body>
+</html>

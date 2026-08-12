@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Longshot</title>
+    <link rel="icon" type="image/svg+xml" href="../../icons/mark.svg" />
     <link rel="stylesheet" href="../shared/theme.css" />
     <link rel="stylesheet" href="popup.css" />
   </head>
@@ -17,9 +18,9 @@
       </div>
       <div class="wordmark">
         Longshot
-        <span class="eyebrow">full page capture</span>
+        <span class="eyebrow" data-i18n="app.tagline">full page capture</span>
       </div>
-      <button class="btn-ghost icon" id="open-settings" title="Settings" aria-label="Settings">
+      <button class="btn-ghost icon" id="open-settings" data-i18n-attr="aria-label:popup.settings;title:popup.settings">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
           <circle cx="12" cy="12" r="3.2" />
           <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 3 15a1.7 1.7 0 0 0-1.55-1H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 7 4.6h.08A1.7 1.7 0 0 0 8.6 3.05V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.08a1.7 1.7 0 0 0 1.55 1.52H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" transform="translate(1.5 1.5) scale(.86)" />
@@ -28,8 +29,8 @@
     </header>
 
     <div id="blocked" class="notice" hidden>
-      <strong><span data-browser>Chrome</span> blocks extensions here.</strong>
-      <span id="blocked-detail">Open a regular http:// or https:// page and try again.</span>
+      <strong id="blocked-title"></strong>
+      <span id="blocked-detail"></span>
     </div>
 
     <main>
@@ -38,8 +39,8 @@
           ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
         ></span>
         <span class="capture-text">
-          <strong>Capture full page</strong>
-          <span class="sub">Scrolls the page and stitches every screen</span>
+          <strong data-i18n="popup.full.title">Capture full page</strong>
+          <span class="sub" data-i18n="popup.full.sub">Scrolls the page and stitches every screen</span>
         </span>
         <kbd id="kbd-full">Alt ⇧ P</kbd>
       </button>
@@ -47,8 +48,8 @@
       <button class="capture secondary" id="capture-visible">
         <span class="frame" aria-hidden="true"></span>
         <span class="capture-text">
-          <strong>Capture visible area</strong>
-          <span class="sub">Just what is on screen right now</span>
+          <strong data-i18n="popup.visible.title">Capture visible area</strong>
+          <span class="sub" data-i18n="popup.visible.sub">Just what is on screen right now</span>
         </span>
         <kbd id="kbd-visible">Alt ⇧ V</kbd>
       </button>
@@ -56,27 +57,27 @@
 
     <section class="strip">
       <div class="row">
-        <span class="eyebrow">Save as</span>
-        <div class="chips" id="format" role="group" aria-label="Output format">
+        <span class="eyebrow" data-i18n="popup.saveAs">Save as</span>
+        <div class="chips" id="format" role="group" data-i18n-attr="aria-label:popup.saveAs">
           <button type="button" data-value="png" aria-pressed="true">PNG</button>
           <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
           <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
         </div>
       </div>
       <label class="row">
-        <span>Open the editor after capture</span>
+        <span data-i18n="popup.openEditor">Open the editor after capture</span>
         <span class="switch"><input type="checkbox" id="openEditor" /><span></span></span>
       </label>
       <label class="row">
-        <span>Download without asking</span>
+        <span data-i18n="popup.autoDownload">Download without asking</span>
         <span class="switch"><input type="checkbox" id="autoDownload" /><span></span></span>
       </label>
     </section>
 
     <footer class="bar foot">
-      <button class="link" id="open-shortcuts">Change shortcuts</button>
+      <button class="link" id="open-shortcuts" data-i18n="popup.changeShortcuts">Change shortcuts</button>
       <span class="dot"></span>
-      <button class="link" id="open-settings-2">All settings</button>
+      <button class="link" id="open-settings-2" data-i18n="popup.allSettings">All settings</button>
       <span class="spacer"></span>
       <span class="eyebrow" id="version"></span>
     </footer>

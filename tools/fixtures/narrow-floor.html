@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin shell with a width floor</title>
+    <!-- The shape that makes a 2x capture pointless: an interface pinned to the
+         viewport that refuses to lay out under 1100px. Zoom the page and the
+         viewport drops below that floor, so the panel hangs off the side of the
+         window where no scrolling reaches it. A capture taken in that state is
+         bands of bare canvas and furniture repeated at every seam, which is why
+         the extension hands the zoom back instead. -->
+    <style>
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden;font:14px system-ui;background:#000;color:#dfe4ee}
+  /* An admin shell pinned to the viewport, with a layout that refuses to go
+     under 1100px. Zoom the page and the viewport shrinks under that floor: the
+     shell no longer covers the content, and everything beside it is bare. */
+  .shell{position:fixed;inset:0;display:flex;min-width:1100px;background:#0f1420}
+  .side{width:230px;height:100vh;background:#151b2b;padding:14px;border-right:1px solid #232c42}
+  .side a{display:block;padding:9px 6px;color:#aab4c8}
+  .main{flex:1;overflow-y:auto;padding:16px;min-width:700px}
+  .row{height:190px;margin:0 0 14px;border-radius:10px;background:#151b2b;border:1px solid #232c42;
+       display:flex;align-items:center;justify-content:center;font:700 40px/1 system-ui}
+    </style>
+  </head>
+  <body>
+  <div class="shell">
+    <aside class="side"><b>logo</b><a>Permissions</a><a>Roles</a><a>Users</a><a>Tokens</a></aside>
+    <main class="main" id="panel">
+      <div class="row">1</div><div class="row">2</div><div class="row">3</div>
+      <div class="row">4</div><div class="row">5</div><div class="row">6</div>
+    </main>
+  </div>
+  </body>
+</html>

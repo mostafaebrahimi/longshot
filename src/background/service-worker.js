@@ -7,7 +7,8 @@
  * costs the worker almost nothing.
  */
 import { BROWSER_NAME } from "../shared/env.js";
-import { DEFAULTS, getSettings } from "../shared/settings.js";
+import { DEFAULTS, getSettings, onSettingsChanged } from "../shared/settings.js";
+import { setLanguage, t } from "../shared/i18n.js";
 
 // compat.js first: it aliases `chrome` to `browser` on Firefox.
 const AGENT_FILES = ["src/shared/compat.js", "src/content/capture.js"];
@@ -23,21 +24,49 @@ const waitingForPort = new Map();
 /* -------------------------------------------------------------- entrypoints */
 
 chrome.runtime.onInstalled.addListener((details) => {
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: "capture-full-page",
-      title: "Capture full page",
-      contexts: ["page", "selection", "image", "link"],
-    });
-    chrome.contextMenus.create({
-      id: "capture-visible",
-      title: "Capture visible area",
-      contexts: ["page", "selection", "image", "link"],
-    });
-  });
   if (details.reason === "install") {
     chrome.tabs.create({ url: chrome.runtime.getURL("src/options/options.html?welcome=1") });
   }
+});
+
+/**
+ * Menu titles and the toolbar tooltip are the only strings the worker owns
+ * outright, so they are rebuilt whenever the language changes.
+ *
+ * Runs one at a time. A worker starting up and a language change arriving
+ * together would otherwise both clear the menus and both add them back, and the
+ * second `create` fails on an id that already exists.
+ */
+let menuWork = Promise.resolve();
+function buildMenus() {
+  menuWork = menuWork.then(rebuildMenus).catch(() => {});
+  return menuWork;
+}
+
+async function rebuildMenus() {
+  const settings = await getSettings();
+  setLanguage(settings.language);
+  await chrome.action.setTitle({ title: t("action.title") });
+  await new Promise((resolve) => chrome.contextMenus.removeAll(resolve));
+  const contexts = ["page", "selection", "image", "link"];
+  await addMenu({ id: "capture-full-page", title: t("menu.full"), contexts });
+  await addMenu({ id: "capture-visible", title: t("menu.visible"), contexts });
+}
+
+/** `create` reports through runtime.lastError, which has to be read or the
+ *  browser logs it as unchecked. */
+function addMenu(spec) {
+  return new Promise((resolve) => {
+    chrome.contextMenus.create(spec, () => {
+      void chrome.runtime.lastError;
+      resolve();
+    });
+  });
+}
+
+buildMenus();
+onSettingsChanged((changes) => {
+  if (changes.language) buildMenus();
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -55,7 +84,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.t !== "string") return;
   if (msg.t === "longshot:start") {
     (async () => {
-      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      // The popup names the tab it was opened over. By the time the worker
+      // looks, that popup has closed and the window may not be the last
+      // focused one any more, so asking again can answer with a different page
+      // or none at all.
+      const tab = await tabFor(msg.tabId);
       if (tab) begin(tab, msg.mode);
     })();
     sendResponse({ ok: true });
@@ -71,6 +104,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return;
   }
 });
+
+/** The named tab if it is still there, otherwise whatever is in front. */
+async function tabFor(tabId) {
+  if (typeof tabId === "number") {
+    const tab = await chrome.tabs.get(tabId).catch(() => null);
+    if (tab) return tab;
+  }
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  return tab || null;
+}
 
 chrome.runtime.onConnect.addListener((port) => {
   const m = /^longshot-editor:(\d+)$/.exec(port.name);
@@ -94,7 +137,7 @@ globalThis.longshot = { begin };
 
 async function begin(tab, mode) {
   if (current) {
-    flashBadge("···", "#f2c14e", "A capture is already running");
+    flashBadge("···", "#f2c14e", t("action.busy"));
     return;
   }
   const id = ++seq;
@@ -115,6 +158,7 @@ async function begin(tab, mode) {
       await openEditorTab(tab, id, message);
     }
     await chrome.tabs.sendMessage(tab.id, { t: "longshot:finish" }).catch(() => {});
+    if (current && current.restoreZoom) await current.restoreZoom();
     flashBadge("!", "#ff6b5e", message);
   } finally {
     current = null;
@@ -125,26 +169,51 @@ async function begin(tab, mode) {
 
 async function runCapture(tab, mode, session) {
   if (!tab.url || RESTRICTED.test(tab.url) || WEBSTORE.test(tab.url)) {
-    throw new Error(
-      `${BROWSER_NAME} blocks extensions on this page. Try it on a normal http:// or https:// site.`
-    );
+    throw new Error(t("error.restricted", { browser: BROWSER_NAME }));
   }
 
   const settings = await getSettings();
+  setLanguage(settings.language);
+
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: AGENT_FILES });
+
+  let zoom = await zoomForDetail(tab, settings.captureScale);
+  session.restoreZoom = zoom.restore;
   const opts = {
     mode,
     settleMs: clamp(settings.settleMs, 0, 3000),
     preScroll: mode === "full" && settings.preScroll,
     hideFixed: settings.hideFixed,
+    pageFrame: settings.pageFrame,
     freezeMotion: settings.freezeMotion,
     showOverlay: settings.showOverlay && mode === "full",
     maxPixels: settings.maxPixels,
+    // The capture agent is injected as a classic script and cannot read the
+    // catalogues, so the handful of words it shows travel with the options.
+    strings: {
+      title: t("capture.title"),
+      cancel: t("capture.cancel"),
+      stopping: t("capture.stopping"),
+      tile: t("capture.tile"),
+      noVisibleArea: t("error.noVisibleArea"),
+      interrupted: t("error.interrupted"),
+      unknownMessage: t("error.unknownMessage"),
+    },
   };
 
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: AGENT_FILES });
+  let plan = await send(tab.id, { t: "longshot:prepare", opts });
+  if (!plan.ok) throw new Error(plan.error || t("error.couldNotRead"));
 
-  const plan = await send(tab.id, { t: "longshot:prepare", opts });
-  if (!plan.ok) throw new Error(plan.error || "Could not read this page.");
+  // Twice the detail is not worth a picture of a broken page: hand the zoom
+  // back and measure again as the page normally sits.
+  if (zoom.zoomed && needsMoreWidth(plan)) {
+    await send(tab.id, { t: "longshot:finish" }).catch(() => {});
+    await zoom.restore();
+    zoom = { restore: async () => {}, declined: true };
+    session.restoreZoom = null;
+    plan = await send(tab.id, { t: "longshot:prepare", opts });
+    if (!plan.ok) throw new Error(plan.error || t("error.couldNotRead"));
+  }
 
   const editorTab = await openEditorTab(tab, session.id, null);
   session.editorTabId = editorTab.id;
@@ -160,8 +229,10 @@ async function runCapture(tab, mode, session) {
     dpr: plan.dpr,
     viewportW: plan.viewportW,
     full: plan.full,
+    frame: plan.frame || null,
     tiles: plan.positions.length,
     truncated: plan.truncated,
+    scaleDeclined: zoom.declined,
     page: { title: tab.title || "", url: tab.url || "" },
   });
 
@@ -174,15 +245,19 @@ async function runCapture(tab, mode, session) {
     await assertStillActive(tab.id);
 
     const step = await send(tab.id, { t: "longshot:step", index: i, opts });
-    if (!step.ok) throw new Error(step.error || "Capture was interrupted.");
+    if (!step.ok) throw new Error(step.error || t("error.interrupted"));
 
     const dataUrl = await captureWithRetry(tab.windowId, format, settings.jpegQuality);
-    port.postMessage({ t: "tile", index: i, dataUrl, src: step.src, dest: step.dest });
+    // `parts` is a list because one bitmap can land in more than one place: the
+    // first screen also supplies the strip that sits below the panel.
+    port.postMessage({ t: "tile", index: i, dataUrl, parts: step.parts });
 
     chrome.action.setBadgeText({ text: `${Math.round(((i + 1) / total) * 100)}` });
   }
 
   await send(tab.id, { t: "longshot:finish" }).catch(() => {});
+  await zoom.restore();
+  session.restoreZoom = null;
   port.postMessage({ t: "complete" });
 
   if (settings.openEditor) {
@@ -191,17 +266,78 @@ async function runCapture(tab, mode, session) {
   }
 }
 
+/**
+ * Capture at twice the detail by zooming the page first.
+ *
+ * `captureVisibleTab` hands back exactly what the screen holds, so on an
+ * ordinary display that is one image pixel per CSS pixel and no amount of
+ * processing afterwards invents more. Zooming to 200% makes the browser draw
+ * everything at twice the size, and the same screen then holds twice the detail
+ * — genuinely sharper text rather than an enlargement of soft text.
+ *
+ * The cost is honest and unavoidable: the page lays out in half the CSS width,
+ * so a responsive site may arrange itself differently. Hence a setting, and
+ * hence the default of 1.
+ *
+ * Returns a function that puts the zoom back, whatever happens next.
+ */
+async function zoomForDetail(tab, captureScale) {
+  const none = { restore: async () => {}, declined: false };
+  const factor = Number(captureScale) || 1;
+  if (factor <= 1) return none;
+
+  const zoomSettings = await chrome.tabs.getZoomSettings(tab.id).catch(() => null);
+  const before = await chrome.tabs.getZoom(tab.id).catch(() => null);
+  if (before == null) return none;
+
+  let restored = false;
+  const restore = async () => {
+    if (restored) return;
+    restored = true;
+    await chrome.tabs.setZoom(tab.id, before).catch(() => {});
+    if (zoomSettings) await chrome.tabs.setZoomSettings(tab.id, zoomSettings).catch(() => {});
+    await sleep(250);
+  };
+
+  try {
+    // Per-tab scope: the zoom belongs to this capture, not to the site forever.
+    await chrome.tabs.setZoomSettings(tab.id, { scope: "per-tab", mode: "automatic" });
+    await chrome.tabs.setZoom(tab.id, before * factor);
+    await sleep(450); // the page relays out, and often reacts to the resize
+  } catch {
+    await restore();
+    return none;
+  }
+
+  return { restore, declined: false, zoomed: true };
+}
+
+/**
+ * Whether a plan says the page stopped fitting its own window.
+ *
+ * Zooming halves the width the page has to lay out in, and most interfaces have
+ * a floor under that. Below it the panel hangs off the side of the window,
+ * where no amount of scrolling reaches it, and anything pinned to the viewport
+ * stops covering the page: bare bands down the sides of the image, furniture
+ * repeated at every seam. A shell positioned fixed overflows without the
+ * document ever reporting it, so the plan is what to ask — it has measured the
+ * real thing.
+ */
+function needsMoreWidth(plan) {
+  return !!plan.ok && !!plan.clipped;
+}
+
 class CancelledError extends Error {
   constructor() {
-    super("Capture cancelled.");
+    super(t("error.cancelled"));
     this.cancelled = true;
   }
 }
 
 async function assertStillActive(tabId) {
-  const t = await chrome.tabs.get(tabId).catch(() => null);
-  if (!t || !t.active) {
-    throw new Error("The page stopped being the active tab, so the capture stopped.");
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  if (!tab || !tab.active) {
+    throw new Error(t("error.notActive"));
   }
 }
 
@@ -221,7 +357,7 @@ async function captureWithRetry(windowId, format, quality) {
       wait = Math.min(1200, wait * 1.5);
     }
   }
-  throw new Error(`${BROWSER_NAME} refused to take a screenshot of this tab.`);
+  throw new Error(t("error.refused", { browser: BROWSER_NAME }));
 }
 
 async function send(tabId, message) {
@@ -249,7 +385,7 @@ function waitForPort(id, timeoutMs) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       waitingForPort.delete(id);
-      reject(new Error("The editor tab did not open in time."));
+      reject(new Error(t("error.editorTimeout")));
     }, timeoutMs);
     waitingForPort.set(id, (port) => {
       clearTimeout(timer);
@@ -261,13 +397,13 @@ function waitForPort(id, timeoutMs) {
 /* -------------------------------------------------------------------- utils */
 
 function friendlyError(err, tab) {
-  if (err && err.cancelled) return "Capture cancelled.";
+  if (err && err.cancelled) return t("error.cancelled");
   const raw = String((err && err.message) || err);
   if (/Cannot access|Extension manifest|blocked|Missing host permission/i.test(raw)) {
-    return `${BROWSER_NAME} does not allow extensions to read ${hostOf(tab.url)}. Open the page on a regular site and try again.`;
+    return t("error.hostPermission", { browser: BROWSER_NAME, host: hostOf(tab.url) });
   }
   if (/Receiving end does not exist|message port closed/i.test(raw)) {
-    return "The page reloaded during the capture. Reload it and try again.";
+    return t("error.reloaded");
   }
   return raw;
 }
@@ -295,6 +431,6 @@ function flashBadge(text, color, title) {
   chrome.action.setTitle({ title: `Longshot — ${title}` });
   setTimeout(() => {
     chrome.action.setBadgeText({ text: "" });
-    chrome.action.setTitle({ title: "Longshot — capture this page" });
+    chrome.action.setTitle({ title: t("action.title") });
   }, 4000);
 }

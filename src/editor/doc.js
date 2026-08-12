@@ -31,6 +31,53 @@ export function findShape(doc, id) {
   return doc.shapes.find((s) => s.id === id) || null;
 }
 
+export function moveShape(shape, dx, dy) {
+  if (shape.type === "pen") {
+    for (let i = 0; i < shape.points.length; i += 2) {
+      shape.points[i] += dx;
+      shape.points[i + 1] += dy;
+    }
+  } else if (ENDPOINTS.has(shape.type)) {
+    shape.x1 += dx;
+    shape.y1 += dy;
+    shape.x2 += dx;
+    shape.y2 += dy;
+  } else {
+    shape.x += dx;
+    shape.y += dy;
+  }
+}
+
+/** A copy of a shape, offset so it does not sit exactly on the original — an
+ *  invisible duplicate reads as nothing having happened. */
+export function duplicateShape(doc, id, offset) {
+  const shape = findShape(doc, id);
+  if (!shape) return null;
+  const copy = JSON.parse(JSON.stringify(shape));
+  moveShape(copy, offset, offset);
+  // Badges number themselves, so a copied 2 becomes the next number in the run.
+  if (copy.type === "step") copy.n = nextStepNumber(doc);
+  return addShape(doc, copy);
+}
+
+/** Paint order is array order, so stacking is a move within `shapes`. */
+export function raiseShape(doc, id, toFront) {
+  const i = doc.shapes.findIndex((s) => s.id === id);
+  if (i < 0 || (toFront ? i === doc.shapes.length - 1 : i === 0)) return false;
+  const [shape] = doc.shapes.splice(i, 1);
+  if (toFront) doc.shapes.push(shape);
+  else doc.shapes.unshift(shape);
+  return true;
+}
+
+export function isFrontmost(doc, id) {
+  return doc.shapes.at(-1)?.id === id;
+}
+
+export function isBackmost(doc, id) {
+  return doc.shapes[0]?.id === id;
+}
+
 /** Region currently in play: the crop if one is set, otherwise the whole page. */
 export function viewRect(doc) {
   return doc.crop ? { ...doc.crop } : { x: 0, y: 0, w: doc.width, h: doc.height };

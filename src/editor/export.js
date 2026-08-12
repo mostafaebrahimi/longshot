@@ -2,7 +2,7 @@
 
 import { viewRect } from "./doc.js";
 import { drawScene } from "./render.js";
-import { buildPdf, PAGE_SIZES } from "../shared/pdf.js";
+import { buildPdf, deflate, rgbBytes, PAGE_SIZES } from "../shared/pdf.js";
 
 const MAX_AREA = 268000000; // Chrome's canvas ceiling, with a little headroom
 
@@ -21,7 +21,41 @@ export function renderExport(doc, scalePercent = 100) {
   ctx.scale(scale, scale);
   ctx.translate(-rect.x, -rect.y);
   drawScene(ctx, doc);
-  return canvas;
+  return scale < 0.5 ? refine(doc, rect, scale, canvas) : canvas;
+}
+
+/**
+ * Redraw a heavy downscale by halving instead.
+ *
+ * One drawImage straight from full size to a quarter or less throws away most
+ * of the pixels it passes over, and thin strokes and small text come out
+ * speckled. Halving repeatedly averages everything on the way down, which is
+ * what a screenshot shrunk for an email wants to look like.
+ */
+function refine(doc, rect, scale, fallback) {
+  let step = document.createElement("canvas");
+  step.width = Math.max(1, Math.round(rect.w));
+  step.height = Math.max(1, Math.round(rect.h));
+  let ctx = step.getContext("2d");
+  ctx.translate(-rect.x, -rect.y);
+  drawScene(ctx, doc);
+
+  const target = { w: fallback.width, h: fallback.height };
+  while (step.width > target.w * 2 && step.height > target.h * 2) {
+    const half = document.createElement("canvas");
+    half.width = Math.max(target.w, Math.round(step.width / 2));
+    half.height = Math.max(target.h, Math.round(step.height / 2));
+    const hctx = half.getContext("2d");
+    hctx.imageSmoothingQuality = "high";
+    hctx.drawImage(step, 0, 0, half.width, half.height);
+    step = half;
+  }
+  ctx = fallback.getContext("2d");
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, target.w, target.h);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(step, 0, 0, target.w, target.h);
+  return fallback;
 }
 
 export function toBlob(canvas, type, quality) {
@@ -34,12 +68,17 @@ export function toBlob(canvas, type, quality) {
   });
 }
 
-/** JPEG needs an opaque backdrop, otherwise transparent pixels come out black. */
-export function flatten(canvas, background = "#ffffff") {
+/**
+ * JPEG needs an opaque backdrop, otherwise transparent pixels come out black.
+ *
+ * `readBack` marks a canvas whose pixels are going to be read out again, which
+ * has to be decided when the context is made rather than when it is read.
+ */
+export function flatten(canvas, background = "#ffffff", readBack = false) {
   const out = document.createElement("canvas");
   out.width = canvas.width;
   out.height = canvas.height;
-  const ctx = out.getContext("2d");
+  const ctx = out.getContext("2d", { willReadFrequently: readBack });
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, out.width, out.height);
   ctx.drawImage(canvas, 0, 0);
@@ -59,7 +98,10 @@ export async function buildOutput(doc, settings) {
     };
   }
   if (settings.format === "pdf") {
-    const blob = await buildPdfFrom(canvas, settings.pdfPageMode, quality, doc.meta.title);
+    // Pixels per CSS pixel in the file being written: what the capture holds,
+    // less whatever the output scale threw away.
+    const density = (doc.meta.captureScale || 1) * (canvas.width / Math.max(1, viewRect(doc).w));
+    const blob = await buildPdfFrom(canvas, settings, quality, doc.meta.title, density);
     return { blob, extension: "pdf", width: canvas.width, height: canvas.height };
   }
   return {
@@ -70,13 +112,20 @@ export async function buildOutput(doc, settings) {
   };
 }
 
-async function buildPdfFrom(canvas, pageMode, quality, title) {
-  const size = PAGE_SIZES[pageMode] || null;
-  const flat = flatten(canvas);
+async function buildPdfFrom(canvas, settings, quality, title, density) {
+  const size = PAGE_SIZES[settings.pdfPageMode] || null;
+  const lossless = !!settings.pdfLossless;
+  const flat = flatten(canvas, "#ffffff", lossless);
+  const encode = lossless
+    ? async (c) => ({ bytes: await deflate(rgbBytes(c)), filter: "flate" })
+    : async (c) => ({
+        bytes: new Uint8Array(await (await toBlob(c, "image/jpeg", quality)).arrayBuffer()),
+        filter: "jpeg",
+      });
 
   if (!size) {
-    const bytes = new Uint8Array(await (await toBlob(flat, "image/jpeg", quality)).arrayBuffer());
-    return buildPdf([{ bytes, w: flat.width, h: flat.height }], { pageSize: null, title });
+    const page = await encode(flat);
+    return buildPdf([{ ...page, w: flat.width, h: flat.height }], { pageSize: null, title, density });
   }
 
   // Slice the tall screenshot into page-shaped bands so it prints properly.
@@ -89,15 +138,14 @@ async function buildPdfFrom(canvas, pageMode, quality, title) {
     const band = document.createElement("canvas");
     band.width = flat.width;
     band.height = h;
-    const ctx = band.getContext("2d");
+    const ctx = band.getContext("2d", { willReadFrequently: lossless });
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, band.width, band.height);
     ctx.drawImage(flat, 0, y, flat.width, h, 0, 0, flat.width, h);
-    const bytes = new Uint8Array(await (await toBlob(band, "image/jpeg", quality)).arrayBuffer());
-    pages.push({ bytes, w: band.width, h: band.height });
+    pages.push({ ...(await encode(band)), w: band.width, h: band.height });
     if (pages.length >= 200) break;
   }
-  return buildPdf(pages, { pageSize: size, margin, title });
+  return buildPdf(pages, { pageSize: size, margin, title, density });
 }
 
 export async function saveBlob(blob, filename, saveAs) {

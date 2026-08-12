@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Longshot</title>
+    <link rel="icon" type="image/svg+xml" href="../../icons/mark.svg" />
     <link rel="stylesheet" href="../shared/theme.css" />
     <link rel="stylesheet" href="editor.css" />
   </head>
@@ -18,67 +19,80 @@
         </div>
 
         <div class="file">
-          <input id="filename" type="text" spellcheck="false" aria-label="File name" />
+          <input id="filename" type="text" spellcheck="false" data-i18n-attr="aria-label:editor.filename.tip" data-tip-key="editor.filename.tip"
+            data-tip-side="bottom" data-hint-key="editor.filename.hint" />
           <span class="dims num" id="dims">—</span>
         </div>
 
         <div class="grow"></div>
 
         <div class="zoom">
-          <button class="btn-ghost sq" id="zoom-out" title="Zoom out (−)">
+          <button class="btn-ghost sq" id="zoom-out" aria-label="Zoom out" data-i18n-attr="aria-label:editor.zoomOut" data-tip-key="editor.zoomOut" data-key="−"
+                  data-hint-key="editor.zoomOut.hint">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M5 12h14" stroke-linecap="round"/></svg>
           </button>
-          <button class="btn-ghost zoom-value num" id="zoom-value" title="Reset to 100%">100%</button>
-          <button class="btn-ghost sq" id="zoom-in" title="Zoom in (+)">
+          <button class="btn-ghost zoom-value num" id="zoom-value" data-tip-key="editor.zoomReset"
+                  data-hint-key="editor.zoomReset.hint">100%</button>
+          <button class="btn-ghost sq" id="zoom-in" aria-label="Zoom in" data-i18n-attr="aria-label:editor.zoomIn" data-tip-key="editor.zoomIn" data-key="+"
+                  data-hint-key="editor.zoomIn.hint">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
           </button>
-          <button class="btn-ghost" id="zoom-fit" title="Fit to window (0)">Fit</button>
+          <button class="btn-ghost" id="zoom-fit" data-tip-key="editor.zoomFit" data-key="0"
+                  data-hint-key="editor.zoomFit.hint" data-i18n="editor.zoomFit.label">Fit</button>
         </div>
 
         <span class="sep"></span>
 
-        <button class="btn" id="copy">
+        <button class="btn" id="copy" data-tip-key="editor.copy" data-key="Ctrl+C"
+                data-hint-key="editor.copy.hint">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>
-          Copy
+          <span data-i18n="editor.copy">Copy</span>
         </button>
 
-        <div class="chips" id="format" role="group" aria-label="Save as">
-          <button type="button" data-value="png" aria-pressed="true">PNG</button>
-          <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
-          <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
+        <div class="chips" id="format" role="group" data-i18n-attr="aria-label:popup.saveAs">
+          <button type="button" data-value="png" aria-pressed="true" data-tip="PNG" data-hint-key="editor.format.png.hint">PNG</button>
+          <button type="button" data-value="jpeg" aria-pressed="false" data-tip="JPG" data-hint-key="editor.format.jpeg.hint">JPG</button>
+          <button type="button" data-value="pdf" aria-pressed="false" data-tip="PDF" data-hint-key="editor.format.pdf.hint">PDF</button>
         </div>
 
-        <button class="btn btn-primary" id="save">
+        <button class="btn btn-primary" id="save" data-tip-key="editor.save" data-key="Ctrl+S"
+                data-hint-key="editor.save.hint">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v11m0 0 4-4m-4 4-4-4" stroke-linecap="round"/><path d="M4 18v2h16v-2" stroke-linecap="round"/></svg>
           Save
         </button>
 
-        <button class="btn-ghost sq" id="open-settings" title="Settings">
+        <button class="btn-ghost sq" id="open-settings" data-i18n-attr="aria-label:editor.settings"
+                data-tip-key="editor.settings" data-hint-key="editor.settings.hint">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" stroke-linecap="round"/></svg>
         </button>
       </header>
 
       <div class="body">
-        <nav class="tools" id="tools" aria-label="Tools"></nav>
+        <nav class="tools" id="tools" data-i18n-attr="aria-label:editor.tools"></nav>
 
         <div class="stage-wrap">
           <div class="inspector" id="inspector" hidden>
-            <div class="swatches" id="swatches" role="group" aria-label="Colour"></div>
+            <div class="swatches" id="swatches" role="group" data-i18n-attr="aria-label:editor.colour"></div>
             <span class="sep tall"></span>
             <label class="ctl">
               <span class="eyebrow" id="size-label">Width</span>
-              <input type="range" id="size" min="1" max="40" step="1" />
+              <input type="range" id="size" min="1" max="40" step="1" data-tip-key="editor.size" data-hint-key="editor.size.hint" />
               <span class="num" id="size-value">4</span>
             </label>
             <span class="sep tall"></span>
-            <button class="btn-ghost" id="undo" title="Undo (Ctrl+Z)">Undo</button>
-            <button class="btn-ghost" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
-            <button class="btn-ghost danger" id="delete" title="Delete (Del)">Delete</button>
+            <button class="btn-ghost" id="undo" data-tip-key="editor.undo" data-key="Ctrl+Z"
+              data-hint-key="editor.undo.hint" data-i18n="editor.undo">Undo</button>
+            <button class="btn-ghost" id="redo" data-tip-key="editor.redo" data-key="Ctrl+Shift+Z"
+              data-hint-key="editor.redo.hint" data-i18n="editor.redo">Redo</button>
+            <button class="btn-ghost danger" id="delete" data-tip-key="editor.delete" data-key="Del"
+              data-hint-key="editor.delete.hint" data-i18n="editor.delete">Delete</button>
             <div class="grow"></div>
             <div class="crop-actions" id="crop-actions" hidden>
-              <span class="eyebrow">Crop</span>
-              <button class="btn" id="crop-apply">Apply</button>
-              <button class="btn-ghost" id="crop-reset">Reset</button>
+              <span class="eyebrow" data-i18n="editor.crop">Crop</span>
+              <button class="btn" id="crop-apply" data-tip-key="editor.crop.apply.tip" data-key="Enter"
+                data-hint-key="editor.crop.apply.hint" data-i18n="editor.crop.apply">Apply</button>
+              <button class="btn-ghost" id="crop-reset" data-tip-key="editor.crop.reset.tip"
+                data-hint-key="editor.crop.reset.hint" data-i18n="editor.crop.reset">Reset</button>
             </div>
           </div>
 
@@ -90,18 +104,18 @@
               <div class="progress-card">
                 <div class="ladder" id="ladder"></div>
                 <div>
-                  <div class="progress-title" id="progress-title">Capturing page</div>
-                  <div class="eyebrow" id="progress-count">waiting for the first tile</div>
+                  <div class="progress-title" id="progress-title" data-i18n="editor.progress.title">Capturing page</div>
+                  <div class="eyebrow" id="progress-count" data-i18n="editor.progress.waiting">waiting for the first tile</div>
                 </div>
-                <button class="btn" id="progress-cancel">Cancel</button>
+                <button class="btn" id="progress-cancel" data-i18n="editor.progress.cancel">Cancel</button>
               </div>
             </div>
 
             <div class="failure" id="failure" hidden>
               <div class="failure-card">
-                <div class="eyebrow">Capture stopped</div>
+                <div class="eyebrow" data-i18n="editor.failure.title">Capture stopped</div>
                 <p id="failure-message"></p>
-                <button class="btn" id="failure-close">Close this tab</button>
+                <button class="btn" id="failure-close" data-i18n="editor.failure.close">Close this tab</button>
               </div>
             </div>
           </main>
@@ -114,12 +128,9 @@
       </div>
 
       <footer class="statusbar">
-        <span class="eyebrow" id="status-left">Ready</span>
+        <span class="eyebrow" id="status-left" data-i18n="editor.status.ready">Ready</span>
         <div class="grow"></div>
-        <span class="eyebrow hints">
-          <kbd>V</kbd> select <kbd>C</kbd> crop <kbd>A</kbd> arrow <kbd>T</kbd> text
-          <kbd>B</kbd> blur <kbd>Space</kbd> pan <kbd>Ctrl</kbd>+<kbd>S</kbd> save
-        </span>
+        <span class="eyebrow hints" id="hints"></span>
       </footer>
     </div>
 

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>App shell — inner scroller</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; overflow: hidden; font: 16px system-ui, sans-serif; }
+      body { background: #f6f7fb; }
+
+      .sidebar {
+        position: fixed; inset-block: 0; inset-inline-end: 0; width: 230px;
+        background: #fff; border-inline-start: 1px solid #e5e7eb; z-index: 5;
+      }
+      .topbar {
+        position: fixed; inset-block-start: 0; inset-inline-end: 230px; inset-inline-start: 0;
+        height: 56px; background: #fff; border-block-end: 1px solid #e5e7eb; z-index: 4;
+        display: flex; align-items: center; padding: 0 20px; font-weight: 600;
+      }
+      .footer {
+        position: fixed; inset-block-end: 0; inset-inline-end: 230px; inset-inline-start: 0;
+        height: 58px; background: #fff; border-block-start: 1px solid #e5e7eb; z-index: 4;
+        display: flex; align-items: center; padding: 0 20px; color: #6b7280;
+      }
+
+      /* The pattern this fixture exists for: a scrolling panel whose client box
+         runs past the bottom of the window, so its last rows can never be
+         scrolled into view. It scrolls smoothly too, which is what makes a
+         panel answer scrollTop reads with where it still is. */
+      .main {
+        position: fixed; inset-block-start: 56px; inset-inline-end: 230px; inset-inline-start: 0;
+        height: calc(100vh + 400px);
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        padding: 20px;
+      }
+
+      .row {
+        height: 220px; margin-bottom: 16px; border-radius: 12px; background: #fff;
+        border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center;
+        font: 700 64px/1 system-ui, sans-serif; color: #111827;
+      }
+      .sticky-note {
+        position: sticky; top: 0; background: #ede9fe; padding: 10px 14px;
+        border-radius: 8px; margin-bottom: 16px; font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">sidebar</aside>
+    <header class="topbar">app header</header>
+    <main class="main" id="panel">
+      <div class="sticky-note">sticky panel header</div>
+      <div class="row" style="background:#fee2e2">1</div>
+      <div class="row" style="background:#ffedd5">2</div>
+      <div class="row" style="background:#dcfce7">3</div>
+      <div class="row" style="background:#e0f2fe">4</div>
+      <div class="row" style="background:#ede9fe">5</div>
+      <div class="row" style="background:#fce7f3">6</div>
+      <div class="row" style="background:#111827; color:#fff">7</div>
+      <div class="row" style="background:#0f766e; color:#fff">8</div>
+    </main>
+    <footer class="footer">footer bar</footer>
+  </body>
+</html>

@@ -1,0 +1,245 @@
+/** Spanish. */
+export default {
+  "lang.name": "Español",
+
+  "app.tagline": "captura de página completa",
+  "popup.settings": "Ajustes",
+  "popup.blocked.title": "{browser} bloquea las extensiones aquí.",
+  "popup.blocked.detail": "Abre una página http:// o https:// normal e inténtalo de nuevo.",
+  "popup.blocked.geckoFileTitle": "Firefox bloquea los archivos locales.",
+  "popup.blocked.geckoFileDetail":
+    "Firefox no deja que las extensiones lean páginas servidas desde tu disco. Abre la página por http:// o https://.",
+  "popup.blocked.fileTitle": "Los archivos locales necesitan un permiso más.",
+  "popup.blocked.fileDetail":
+    "Activa «Permitir acceso a URLs de archivo» en la página de detalles de la extensión para capturar archivos de tu disco.",
+  "popup.full.title": "Capturar la página completa",
+  "popup.full.sub": "Recorre la página y une todas las pantallas",
+  "popup.visible.title": "Capturar el área visible",
+  "popup.visible.sub": "Solo lo que se ve ahora mismo",
+  "popup.saveAs": "Guardar como",
+  "popup.openEditor": "Abrir el editor tras capturar",
+  "popup.autoDownload": "Descargar sin preguntar",
+  "popup.changeShortcuts": "Cambiar atajos",
+  "popup.allSettings": "Todos los ajustes",
+
+  "options.title": "Ajustes de Longshot",
+  "options.subtitle": "captura de página completa · ajustes",
+  "options.welcome.title": "Todo listo.",
+  "options.welcome.body":
+    "Abre cualquier página y pulsa <kbd id=\"welcome-shortcut\">Alt+Shift+P</kbd>, o haz clic en el icono de Longshot en la barra. La página se desplaza sola, cada pantalla se une en una sola imagen y el editor se abre listo para recortar, anotar y guardar.",
+  "options.welcome.privacy":
+    "No se sube nada. Las capturas se unen dentro de tu navegador y solo salen de él cuando las guardas.",
+
+  "options.section.capture": "Captura",
+  "options.preScroll.label": "Recorrer la página primero",
+  "options.preScroll.hint":
+    "Hace una pasada rápida para que las imágenes diferidas aparezcan en la captura. Más lento, pero con muchos menos huecos.",
+  "options.hideFixed.label": "Ocultar cabeceras fijas y barras flotantes",
+  "options.hideFixed.hint":
+    "Evita que las barras de navegación y los avisos de cookies se repitan por toda la captura.",
+  "options.pageFrame.label": "Conservar el marco de la página",
+  "options.pageFrame.hint":
+    "En aplicaciones que desplazan un panel interior, mantiene la cabecera y la barra lateral alrededor de la captura en vez de tomar solo el panel.",
+  "options.freezeMotion.label": "Pausar las animaciones",
+  "options.freezeMotion.hint":
+    "Congela las animaciones CSS durante la captura. Déjalo apagado si la página revela contenido al desplazarse.",
+  "options.showOverlay.label": "Mostrar el progreso en la página",
+  "options.showOverlay.hint":
+    "Una tarjeta pequeña en la esquina con un botón para cancelar. Nunca sale en la captura.",
+  "options.settleMs.label": "Esperar tras cada desplazamiento",
+  "options.settleMs.hint":
+    "Da más tiempo a las páginas lentas para asentarse antes de tomar la siguiente pantalla.",
+  "options.settleMs.value": "{n} ms",
+
+  "options.captureScale.label": "Resolución de captura",
+  "options.captureScale.hint": "2× amplía la página, así el texto se captura con el doble de detalle — pero una página adaptable puede reorganizarse.",
+  "options.captureScale.x1": "1× como se ve",
+  "options.captureScale.x2": "2× más nítido",
+  "options.pdfLossless.label": "Imágenes PDF sin pérdidas",
+  "options.pdfLossless.hint": "Mantiene el texto nítido en vez de dejar que el JPEG haga halos alrededor de cada letra. Archivo mayor.",
+
+  "options.section.output": "Salida",
+  "options.format.label": "Guardar como",
+  "options.format.hint": "El PDF se escribe directamente desde la captura, sin diálogo de impresión.",
+  "options.jpegQuality.label": "Calidad JPG",
+  "options.jpegQuality.hint": "Cuanto más baja, menor el archivo y más artefactos de compresión.",
+  "options.pdfPageMode.label": "Páginas del PDF",
+  "options.pdfPageMode.hint":
+    "Una página larga mantiene la captura intacta; los tamaños de papel la cortan para imprimir.",
+  "options.pdfPageMode.single": "Una página larga",
+  "options.pdfPageMode.a4": "Páginas A4",
+  "options.pdfPageMode.letter": "Páginas Carta",
+  "options.scale.label": "Escala de la imagen",
+  "options.scale.hint": "Reduce el archivo guardado. Al 100% conserva cada píxel capturado.",
+  "options.filename.label": "Nombre del archivo",
+  "options.filename.insert": "Insertar {token}",
+  "options.openEditor.label": "Abrir el editor tras capturar",
+  "options.openEditor.hint":
+    "Desactívalo para guardar el archivo directamente en descargas y quedarte en la página.",
+  "options.autoDownload.label": "Descargar sin preguntar",
+  "options.autoDownload.hint":
+    "Se salta el diálogo «Guardar como» y escribe directamente en tu carpeta de descargas.",
+  "options.copyOnCapture.label": "Copiar también al portapapeles",
+  "options.copyOnCapture.hint": "Pone un PNG en el portapapeles en cuanto termina la captura.",
+
+  "options.section.interface": "Interfaz",
+  "options.language.label": "Idioma",
+  "options.language.hint": "Se aplica al menú, a los ajustes y al editor.",
+  "options.theme.label": "Tema",
+  "options.theme.system": "Sistema",
+  "options.theme.dark": "Oscuro",
+  "options.theme.light": "Claro",
+  "options.shortcuts.label": "Atajos de teclado",
+  "options.shortcuts.none": "Aún no hay atajos asignados.",
+  "options.shortcuts.change": "Cambiar atajos",
+
+  "options.section.privacy": "Privacidad",
+  "options.privacy.body":
+    "Longshot funciona por completo en tu equipo. No tiene servidores, ni cuentas, ni analíticas. Las capturas se unen en la pestaña del editor y se quedan ahí hasta que las guardas o las copias. Tus ajustes se sincronizan con tu propio perfil de {browser}.",
+  "options.privacy.activeTab":
+    "La extensión solo puede leer una página después de que inicies una captura en ella: con el icono de la barra, con un atajo o desde el menú contextual.",
+  "options.filename.preview": "Se guarda como {name}",
+  "options.saved": "Guardado",
+  "options.reset": "Restablecer todos los ajustes",
+  "options.resetDone": "Ajustes restablecidos",
+
+  "editor.filename.tip": "Nombre del archivo",
+  "editor.filename.hint":
+    "El nombre con el que se guarda. Edítalo aquí o define una plantilla en los ajustes.",
+  "editor.zoomOut": "Alejar",
+  "editor.zoomOut.hint": "Solo cambia cómo se ve aquí. No afecta al archivo que guardas.",
+  "editor.zoomIn": "Acercar",
+  "editor.zoomIn.hint": "Acércate para colocar una marca con precisión. Mantén Espacio para desplazarte.",
+  "editor.zoomReset": "Tamaño real",
+  "editor.zoomReset.hint": "Volver al 100%: un píxel de imagen por píxel de pantalla.",
+  "editor.zoomFit": "Ajustar a la ventana",
+  "editor.zoomFit.hint": "Mostrar la captura entera de una vez.",
+  "editor.zoomFit.label": "Ajustar",
+  "editor.copy": "Copiar",
+  "editor.copy.hint":
+    "Pone la imagen final en el portapapeles, lista para pegar en un chat o un ticket.",
+  "editor.save": "Guardar",
+  "editor.save.hint": "Escribe la imagen en tus descargas, en el formato elegido al lado.",
+  "editor.saveFormat": "Guardar {format}",
+  "editor.settings": "Ajustes",
+  "editor.settings.hint": "Comportamiento de captura, nombres de archivo, calidad y tema.",
+  "editor.format.png.hint": "Sin pérdidas, texto nítido, archivo mayor. Lo normal para una captura.",
+  "editor.format.jpeg.hint":
+    "Archivo más pequeño, texto algo blando. Bien para páginas con muchas fotos.",
+  "editor.format.pdf.hint":
+    "Una página larga, o cortada en hojas A4 o Carta: se elige en los ajustes.",
+  "editor.undo": "Deshacer",
+  "editor.undo.hint": "Retrocede por cada marca, recorte y cambio de color.",
+  "editor.redo": "Rehacer",
+  "editor.redo.hint": "Devuelve lo que acabas de deshacer.",
+  "editor.delete": "Eliminar",
+  "editor.delete.hint": "Borra la marca seleccionada. Selecciona una con V primero.",
+  "editor.size": "Tamaño",
+  "editor.size.hint":
+    "Grosor, tamaño del texto o intensidad del desenfoque, según la herramienta. También cambia la marca seleccionada.",
+  "editor.colour": "Color",
+  "editor.colour.hint": "Color de la próxima marca, y de la seleccionada si hay alguna.",
+  "editor.crop": "Recortar",
+  "editor.crop.apply": "Aplicar",
+  "editor.crop.apply.tip": "Aplicar el recorte",
+  "editor.crop.apply.hint":
+    "Recorta al rectángulo que dibujaste. Los píxeles se conservan: Restablecer los devuelve.",
+  "editor.crop.reset": "Restablecer",
+  "editor.crop.reset.tip": "Quitar el recorte",
+  "editor.crop.reset.hint": "Vuelve a la captura completa, por muchas veces que hayas recortado.",
+  "editor.crop.needRect": "Dibuja primero un rectángulo sobre la captura",
+
+  "editor.menu.image": "Captura",
+  "editor.menu.copyImage": "Copiar imagen",
+  "editor.menu.duplicate": "Duplicar",
+  "editor.menu.front": "Traer al frente",
+  "editor.menu.back": "Enviar al fondo",
+  "editor.menu.editText": "Editar texto",
+
+  "editor.size.width": "Grosor",
+  "editor.size.text": "Tamaño del texto",
+  "editor.size.blur": "Desenfoque",
+  "editor.size.cell": "Celda",
+
+  "editor.tools": "Herramientas",
+  "editor.tool.select": "Seleccionar y mover",
+  "editor.tool.select.hint":
+    "Toma una marca ya hecha: muévela, cambia su tamaño por los tiradores o cámbiale el color.",
+  "editor.tool.crop": "Recortar",
+  "editor.tool.crop.hint":
+    "Recorta los bordes. Dibuja un rectángulo y pulsa Enter. No se tira nada: puedes restablecerlo.",
+  "editor.tool.arrow": "Flecha",
+  "editor.tool.arrow.hint": "Señala aquello de lo que hablas. Mantén Shift para que salga recta.",
+  "editor.tool.line": "Línea",
+  "editor.tool.line.hint": "Una línea simple, para subrayar o conectar. Mantén Shift para nivelarla.",
+  "editor.tool.rect": "Rectángulo",
+  "editor.tool.rect.hint": "Encuadra una zona. Mantén Shift para un cuadrado perfecto.",
+  "editor.tool.ellipse": "Elipse",
+  "editor.tool.ellipse.hint": "Rodea algo sin taparlo. Mantén Shift para un círculo.",
+  "editor.tool.pen": "Mano alzada",
+  "editor.tool.pen.hint": "Dibuja como con un bolígrafo: marcas, círculos, garabatos.",
+  "editor.tool.text": "Texto",
+  "editor.tool.text.hint": "Haz clic donde va la etiqueta y escribe. El tamaño se ajusta arriba.",
+  "editor.tool.step": "Paso numerado",
+  "editor.tool.step.hint":
+    "Coloca chapas 1, 2, 3 para guiar a alguien por una secuencia. Se numeran solas.",
+  "editor.tool.highlight": "Resaltar",
+  "editor.tool.highlight.hint":
+    "Pasa color sobre una zona como un rotulador. El texto se sigue leyendo debajo.",
+  "editor.tool.blur": "Desenfocar",
+  "editor.tool.blur.hint":
+    "Suaviza una zona hasta que no se lea. Sube el radio para un borrón más fuerte.",
+  "editor.tool.pixelate": "Pixelar",
+  "editor.tool.pixelate.hint":
+    "Rompe la zona en bloques: el aspecto de siempre para un nombre o una cara tapada.",
+  "editor.tool.redact": "Tapar en negro",
+  "editor.tool.redact.hint":
+    "Cubre la zona por completo. No se transparenta nada, así que úsalo para lo sensible.",
+
+  "editor.progress.title": "Capturando la página",
+  "editor.progress.waiting": "esperando la primera pieza",
+  "editor.progress.tile": "pieza {done} / {total}",
+  "editor.progress.cancel": "Cancelar",
+  "editor.progress.stopping": "Deteniendo…",
+  "editor.failure.title": "Captura detenida",
+  "editor.failure.close": "Cerrar esta pestaña",
+  "editor.dims": "{w} × {h} px",
+  "editor.dims.cropped": "{w} × {h} px · recortada",
+  "editor.status.ready": "Listo",
+  "editor.status.captured": "Capturados {w} × {h} px",
+  "editor.status.truncated":
+    "La página era más alta de lo que cabe en una imagen: se capturó todo lo que entra.",
+  "editor.status.scaleDeclined": "Capturada a 1×: esta página necesita más ancho del que le deja el zoom.",
+  "editor.copied": "Copiado al portapapeles",
+  "editor.copyFailed": "No se pudo copiar: {error}",
+  "editor.saved": "Guardado {name} · {size}",
+  "editor.saveFailed": "No se pudo guardar: {error}",
+  "editor.lostCapture": "Esta pestaña perdió el hilo de su captura. Inicia otra desde la barra.",
+  "editor.stoppedEarly": "La captura se detuvo antes de terminar.",
+  "editor.noPixels": "No llegó ningún píxel de esta página.",
+  "editor.hints":
+    "{v} seleccionar {c} recortar {a} flecha {t} texto {b} desenfoque {space} mover {ctrl}+{s} guardar",
+
+  "capture.title": "Capturando la página",
+  "capture.cancel": "Cancelar",
+  "capture.stopping": "Deteniendo…",
+  "capture.tile": "pieza {done} / {total}",
+  "menu.full": "Capturar la página completa",
+  "menu.visible": "Capturar el área visible",
+  "action.title": "Longshot — capturar esta página",
+  "action.busy": "Ya hay una captura en marcha",
+  "error.restricted":
+    "{browser} bloquea las extensiones en esta página. Pruébalo en un sitio http:// o https:// normal.",
+  "error.noVisibleArea": "Esta página no tiene área visible que capturar.",
+  "error.interrupted": "La captura se interrumpió.",
+  "error.cancelled": "Captura cancelada.",
+  "error.unknownMessage": "Mensaje desconocido.",
+  "error.couldNotRead": "No se pudo leer esta página.",
+  "error.notActive": "La página dejó de ser la pestaña activa, así que la captura se detuvo.",
+  "error.refused": "{browser} se negó a tomar una captura de esta pestaña.",
+  "error.hostPermission":
+    "{browser} no permite que las extensiones lean {host}. Abre la página en un sitio normal e inténtalo de nuevo.",
+  "error.reloaded": "La página se recargó durante la captura. Recárgala e inténtalo de nuevo.",
+  "error.editorTimeout": "La pestaña del editor no se abrió a tiempo.",
+  "error.tooLarge": "La imagen es demasiado grande para codificarla.",
+};

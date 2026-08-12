@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Longshot settings</title>
+    <title data-i18n="options.title">Longshot settings</title>
+    <link rel="icon" type="image/svg+xml" href="../../icons/mark.svg" />
     <link rel="stylesheet" href="../shared/theme.css" />
     <link rel="stylesheet" href="options.css" />
   </head>
@@ -18,62 +19,76 @@
         </div>
         <div>
           <h1>Longshot</h1>
-          <p class="eyebrow">full page capture · settings</p>
+          <p class="eyebrow" data-i18n="options.subtitle">full page capture · settings</p>
         </div>
       </header>
 
       <section class="welcome" id="welcome" hidden>
-        <h2>You're set up.</h2>
-        <p>
-          Open any page and press <kbd id="welcome-shortcut">Alt+Shift+P</kbd>, or click the
-          Longshot icon in the toolbar. The page scrolls itself, every screen is stitched into one
-          image, and the editor opens with it ready to crop, annotate, and save.
-        </p>
-        <p class="quiet">
-          Nothing is uploaded. Screenshots are stitched inside your browser and only leave it when
-          you save them.
-        </p>
+        <h2 data-i18n="options.welcome.title">You're set up.</h2>
+        <p data-i18n-html="options.welcome.body"></p>
+        <p class="quiet" data-i18n="options.welcome.privacy"></p>
       </section>
 
       <section>
-        <h2 class="eyebrow">Capture</h2>
+        <h2 class="eyebrow" data-i18n="options.section.capture">Capture</h2>
 
         <label class="row">
           <span class="label">
-            Pre-scroll the page first
-            <small>Runs one quick pass so lazy-loaded images appear in the shot. Slower, but far fewer blank gaps.</small>
+            <span data-i18n="options.preScroll.label">Pre-scroll the page first</span>
+            <small data-i18n="options.preScroll.hint">Runs one quick pass so lazy-loaded images appear in the shot. Slower, but far fewer blank gaps.</small>
           </span>
           <span class="switch"><input type="checkbox" id="preScroll" /><span></span></span>
         </label>
 
         <label class="row">
           <span class="label">
-            Hide sticky headers and floating bars
-            <small>Keeps navigation bars and cookie banners from repeating down the whole screenshot.</small>
+            <span data-i18n="options.hideFixed.label">Hide sticky headers and floating bars</span>
+            <small data-i18n="options.hideFixed.hint">Keeps navigation bars and cookie banners from repeating down the whole screenshot.</small>
           </span>
           <span class="switch"><input type="checkbox" id="hideFixed" /><span></span></span>
         </label>
 
         <label class="row">
           <span class="label">
-            Pause animations
-            <small>Freezes CSS animations during capture. Leave off if a page reveals content as you scroll.</small>
+            <span data-i18n="options.pageFrame.label">Keep the page frame</span>
+            <small data-i18n="options.pageFrame.hint">On apps that scroll an inner panel, keeps the header and sidebar around the shot instead of capturing the panel alone.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="pageFrame" /><span></span></span>
+        </label>
+
+        <label class="row">
+          <span class="label">
+            <span data-i18n="options.freezeMotion.label">Pause animations</span>
+            <small data-i18n="options.freezeMotion.hint">Freezes CSS animations during capture. Leave off if a page reveals content as you scroll.</small>
           </span>
           <span class="switch"><input type="checkbox" id="freezeMotion" /><span></span></span>
         </label>
 
         <label class="row">
           <span class="label">
-            Show progress on the page
-            <small>A small card in the corner with a cancel button. It never appears in the screenshot.</small>
+            <span data-i18n="options.showOverlay.label">Show progress on the page</span>
+            <small data-i18n="options.showOverlay.hint">A small card in the corner with a cancel button. It never appears in the screenshot.</small>
           </span>
           <span class="switch"><input type="checkbox" id="showOverlay" /><span></span></span>
         </label>
 
+        <div class="row">
+          <span class="label">
+            <span data-i18n="options.captureScale.label">Capture resolution</span>
+            <small data-i18n="options.captureScale.hint">2× zooms the page, so text is captured at twice the detail — but a responsive page may lay itself out differently.</small>
+          </span>
+          <span class="control">
+            <div class="chips" id="captureScale" role="group" data-i18n-attr="aria-label:options.captureScale.label">
+              <button type="button" data-value="1" aria-pressed="true" data-i18n="options.captureScale.x1">1× as displayed</button>
+              <button type="button" data-value="2" aria-pressed="false" data-i18n="options.captureScale.x2">2× sharper</button>
+            </div>
+          </span>
+        </div>
+
         <label class="row">
           <span class="label">
-            Wait after each scroll
-            <small>Give slow pages more time to settle before the next screen is taken.</small>
+            <span data-i18n="options.settleMs.label">Wait after each scroll</span>
+            <small data-i18n="options.settleMs.hint">Give slow pages more time to settle before the next screen is taken.</small>
           </span>
           <span class="control">
             <input type="range" id="settleMs" min="0" max="1000" step="10" />
@@ -83,15 +98,15 @@
       </section>
 
       <section>
-        <h2 class="eyebrow">Output</h2>
+        <h2 class="eyebrow" data-i18n="options.section.output">Output</h2>
 
         <div class="row">
           <span class="label">
-            Save as
-            <small>PDF is written straight from the screenshot — no printing dialog.</small>
+            <span data-i18n="options.format.label">Save as</span>
+            <small data-i18n="options.format.hint">PDF is written straight from the screenshot — no printing dialog.</small>
           </span>
           <span class="control">
-            <div class="chips" id="format" role="group" aria-label="Save as">
+            <div class="chips" id="format" role="group" data-i18n-attr="aria-label:options.format.label">
               <button type="button" data-value="png" aria-pressed="true">PNG</button>
               <button type="button" data-value="jpeg" aria-pressed="false">JPG</button>
               <button type="button" data-value="pdf" aria-pressed="false">PDF</button>
@@ -101,8 +116,8 @@
 
         <label class="row" id="row-quality">
           <span class="label">
-            JPG quality
-            <small>Lower means a smaller file with more compression artefacts.</small>
+            <span data-i18n="options.jpegQuality.label">JPG quality</span>
+            <small data-i18n="options.jpegQuality.hint">Lower means a smaller file with more compression artefacts.</small>
           </span>
           <span class="control">
             <input type="range" id="jpegQuality" min="40" max="100" step="1" />
@@ -112,22 +127,30 @@
 
         <label class="row" id="row-pdf">
           <span class="label">
-            PDF pages
-            <small>One long page keeps the screenshot intact; paper sizes slice it for printing.</small>
+            <span data-i18n="options.pdfPageMode.label">PDF pages</span>
+            <small data-i18n="options.pdfPageMode.hint">One long page keeps the screenshot intact; paper sizes slice it for printing.</small>
           </span>
           <span class="control">
             <select id="pdfPageMode">
-              <option value="single">One long page</option>
-              <option value="a4">A4 pages</option>
-              <option value="letter">Letter pages</option>
+              <option value="single" data-i18n="options.pdfPageMode.single">One long page</option>
+              <option value="a4" data-i18n="options.pdfPageMode.a4">A4 pages</option>
+              <option value="letter" data-i18n="options.pdfPageMode.letter">Letter pages</option>
             </select>
           </span>
         </label>
 
+        <label class="row" id="row-pdf-lossless">
+          <span class="label">
+            <span data-i18n="options.pdfLossless.label">Lossless PDF images</span>
+            <small data-i18n="options.pdfLossless.hint">Keeps text crisp instead of letting JPEG ring around every letter. Larger file.</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="pdfLossless" /><span></span></span>
+        </label>
+
         <label class="row">
           <span class="label">
-            Image scale
-            <small>Shrink the saved file. 100% keeps every captured pixel.</small>
+            <span data-i18n="options.scale.label">Image scale</span>
+            <small data-i18n="options.scale.hint">Shrink the saved file. 100% keeps every captured pixel.</small>
           </span>
           <span class="control">
             <input type="range" id="scale" min="25" max="100" step="5" />
@@ -137,7 +160,7 @@
 
         <div class="row">
           <span class="label">
-            File name
+            <span data-i18n="options.filename.label">File name</span>
             <small id="filename-preview">Preview</small>
           </span>
           <span class="control">
@@ -149,69 +172,71 @@
 
         <label class="row">
           <span class="label">
-            Open the editor after capture
-            <small>Turn this off to save the file straight to your downloads folder and stay on the page.</small>
+            <span data-i18n="options.openEditor.label">Open the editor after capture</span>
+            <small data-i18n="options.openEditor.hint">Turn this off to save the file straight to your downloads folder and stay on the page.</small>
           </span>
           <span class="switch"><input type="checkbox" id="openEditor" /><span></span></span>
         </label>
 
         <label class="row">
           <span class="label">
-            Download without asking
-            <small>Skips the “Save as” dialog and writes straight to your downloads folder.</small>
+            <span data-i18n="options.autoDownload.label">Download without asking</span>
+            <small data-i18n="options.autoDownload.hint">Skips the “Save as” dialog and writes straight to your downloads folder.</small>
           </span>
           <span class="switch"><input type="checkbox" id="autoDownload" /><span></span></span>
         </label>
 
         <label class="row">
           <span class="label">
-            Copy to the clipboard too
-            <small>Puts a PNG on the clipboard as soon as the capture finishes.</small>
+            <span data-i18n="options.copyOnCapture.label">Copy to the clipboard too</span>
+            <small data-i18n="options.copyOnCapture.hint">Puts a PNG on the clipboard as soon as the capture finishes.</small>
           </span>
           <span class="switch"><input type="checkbox" id="copyOnCapture" /><span></span></span>
         </label>
       </section>
 
       <section>
-        <h2 class="eyebrow">Interface</h2>
+        <h2 class="eyebrow" data-i18n="options.section.interface">Interface</h2>
         <div class="row">
-          <span class="label">Theme</span>
+          <span class="label">
+            <span data-i18n="options.language.label">Language</span>
+            <small data-i18n="options.language.hint">Applies to the popup, the settings page and the editor.</small>
+          </span>
           <span class="control">
-            <div class="chips" id="theme" role="group" aria-label="Theme">
-              <button type="button" data-value="system" aria-pressed="true">System</button>
-              <button type="button" data-value="dark" aria-pressed="false">Dark</button>
-              <button type="button" data-value="light" aria-pressed="false">Light</button>
+            <select id="language"></select>
+          </span>
+        </div>
+        <div class="row">
+          <span class="label" data-i18n="options.theme.label">Theme</span>
+          <span class="control">
+            <div class="chips" id="theme" role="group" data-i18n-attr="aria-label:options.theme.label">
+              <button type="button" data-value="system" aria-pressed="true" data-i18n="options.theme.system">System</button>
+              <button type="button" data-value="dark" aria-pressed="false" data-i18n="options.theme.dark">Dark</button>
+              <button type="button" data-value="light" aria-pressed="false" data-i18n="options.theme.light">Light</button>
             </div>
           </span>
         </div>
         <div class="row">
           <span class="label">
-            Keyboard shortcuts
+            <span data-i18n="options.shortcuts.label">Keyboard shortcuts</span>
             <small id="shortcut-list">—</small>
           </span>
           <span class="control">
-            <button class="btn" id="open-shortcuts">Change shortcuts</button>
+            <button class="btn" id="open-shortcuts" data-i18n="options.shortcuts.change">Change shortcuts</button>
           </span>
         </div>
       </section>
 
       <section>
-        <h2 class="eyebrow">Privacy</h2>
-        <p class="prose">
-          Longshot works entirely on your machine. It has no servers, no accounts, and no analytics.
-          Screenshots are stitched in the editor tab and stay there until you save or copy them.
-          Your settings sync through your own <span data-browser>Chrome</span> profile.
-        </p>
-        <p class="prose quiet">
-          The extension can only read a page after you start a capture on it — by clicking the
-          toolbar icon, using a shortcut, or picking it from the right-click menu.
-        </p>
+        <h2 class="eyebrow" data-i18n="options.section.privacy">Privacy</h2>
+        <p class="prose" id="privacy-body"></p>
+        <p class="prose quiet" data-i18n="options.privacy.activeTab"></p>
       </section>
 
       <footer class="foot">
         <span class="eyebrow" id="version"></span>
         <span class="grow"></span>
-        <button class="btn-ghost" id="reset">Reset all settings</button>
+        <button class="btn-ghost" id="reset" data-i18n="options.reset">Reset all settings</button>
       </footer>
     </div>
 

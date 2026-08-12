@@ -3,11 +3,17 @@
 
 import "../shared/compat.js";
 import { applyTheme, getSettings, setSettings, resolveFilename } from "../shared/settings.js";
+import { setLanguage, applyI18n, t } from "../shared/i18n.js";
 import {
   createDoc,
   addShape,
   removeShape,
   findShape,
+  moveShape,
+  duplicateShape,
+  raiseShape,
+  isFrontmost,
+  isBackmost,
   viewRect,
   nextStepNumber,
   snapshot,
@@ -22,6 +28,7 @@ import {
   ENDPOINTS,
 } from "./doc.js";
 import { drawScene, drawSelection, handlePositions } from "./render.js";
+import { openMenu } from "./menu.js";
 import { buildOutput, copyToClipboard, saveBlob, waitForDownload, humanSize } from "./export.js";
 
 const $ = (id) => document.getElementById(id);
@@ -57,30 +64,32 @@ const COLORS = [
   "#101318",
 ];
 
+// Names and one-line descriptions live in the catalogues: editor.tool.<id> and
+// editor.tool.<id>.hint. The shortcut is a physical key, so it is not translated.
 const TOOLS = [
-  { id: "select", key: "V", name: "Select and move", icon: iconCursor },
-  { id: "crop", key: "C", name: "Crop", icon: iconCrop },
+  { id: "select", key: "V", icon: iconCursor },
+  { id: "crop", key: "C", icon: iconCrop },
   "divider",
-  { id: "arrow", key: "A", name: "Arrow", icon: iconArrow },
-  { id: "line", key: "L", name: "Line", icon: iconLine },
-  { id: "rect", key: "R", name: "Rectangle", icon: iconRect },
-  { id: "ellipse", key: "E", name: "Ellipse", icon: iconEllipse },
-  { id: "pen", key: "P", name: "Freehand", icon: iconPen },
+  { id: "arrow", key: "A", icon: iconArrow },
+  { id: "line", key: "L", icon: iconLine },
+  { id: "rect", key: "R", icon: iconRect },
+  { id: "ellipse", key: "E", icon: iconEllipse },
+  { id: "pen", key: "P", icon: iconPen },
   "divider",
-  { id: "text", key: "T", name: "Text", icon: iconText },
-  { id: "step", key: "S", name: "Numbered step", icon: iconStep },
-  { id: "highlight", key: "H", name: "Highlight", icon: iconHighlight },
+  { id: "text", key: "T", icon: iconText },
+  { id: "step", key: "S", icon: iconStep },
+  { id: "highlight", key: "H", icon: iconHighlight },
   "divider",
-  { id: "blur", key: "B", name: "Blur", icon: iconBlur },
-  { id: "pixelate", key: "X", name: "Pixelate", icon: iconPixelate },
-  { id: "redact", key: "K", name: "Black out", icon: iconRedact },
+  { id: "blur", key: "B", icon: iconBlur },
+  { id: "pixelate", key: "X", icon: iconPixelate },
+  { id: "redact", key: "K", icon: iconRedact },
 ];
 
 const SIZE_SPEC = {
-  text: { label: "Text size", min: 10, max: 140, key: "fontSize" },
-  blur: { label: "Blur", min: 2, max: 50, key: "blurRadius" },
-  pixelate: { label: "Cell", min: 4, max: 60, key: "pixelCell" },
-  step: { label: "Size", min: 10, max: 70, key: "stepSize" },
+  text: { label: "editor.size.text", min: 10, max: 140, key: "fontSize" },
+  blur: { label: "editor.size.blur", min: 2, max: 50, key: "blurRadius" },
+  pixelate: { label: "editor.size.cell", min: 4, max: 60, key: "pixelCell" },
+  step: { label: "editor.size.width", min: 10, max: 70, key: "stepSize" },
   highlight: null,
   redact: null,
   crop: null,
@@ -90,17 +99,23 @@ const SIZE_SPEC = {
 const canvas = $("view");
 const ctx = canvas.getContext("2d");
 
-// Read by tools/smoke-test.mjs to sample the stitched bitmap.
-window.longshot = { doc };
+// Read by tools/smoke-test.mjs to sample the stitched bitmap. `extendFrame` is
+// exposed so the test can run it with the canvas readbacks counted, and `view`
+// so tools/capture-ui.mjs can aim a click at a mark it has just placed.
+window.longshot = { doc, extendFrame, view };
 
 boot();
 
 async function boot() {
   settings = await getSettings();
+  setLanguage(settings.language);
+  applyI18n();
+  paintHints();
   applyTheme(settings.theme);
   const saved = await chrome.storage.local.get("editorStyle");
   if (saved.editorStyle) style = { ...style, ...saved.editorStyle };
 
+  initTooltips();
   buildTools();
   buildSwatches();
   wireChrome();
@@ -120,7 +135,7 @@ async function boot() {
 
 function connectStream(sessionId) {
   if (!sessionId) {
-    showFailure("This tab lost track of its capture. Start a new one from the toolbar.");
+    showFailure(t("editor.lostCapture"));
     return;
   }
   const port = chrome.runtime.connect({ name: `longshot-editor:${sessionId}` });
@@ -130,7 +145,7 @@ function connectStream(sessionId) {
 
   $("progress-cancel").addEventListener("click", () => {
     port.postMessage({ t: "cancel" });
-    $("progress-title").textContent = "Stopping…";
+    $("progress-title").textContent = t("editor.progress.stopping");
   });
 
   port.onMessage.addListener((msg) => {
@@ -142,11 +157,13 @@ function connectStream(sessionId) {
         dpr: msg.dpr,
         mode: msg.mode,
         truncated: msg.truncated,
+        scaleDeclined: msg.scaleDeclined,
         viewportW: msg.viewportW,
         full: msg.full,
+        frame: msg.frame || null,
       };
       buildLadder(expected);
-      $("progress-count").textContent = `tile 0 / ${expected}`;
+      $("progress-count").textContent = t("editor.progress.tile", { done: 0, total: expected });
       return;
     }
     if (msg.t === "tile") {
@@ -155,7 +172,7 @@ function connectStream(sessionId) {
         .then(() => {
           done++;
           updateLadder(done, expected);
-          $("progress-count").textContent = `tile ${done} / ${expected}`;
+          $("progress-count").textContent = t("editor.progress.tile", { done, total: expected });
         })
         .catch((err) => showFailure(String(err.message || err)));
       return;
@@ -170,7 +187,7 @@ function connectStream(sessionId) {
   });
 
   port.onDisconnect.addListener(() => {
-    if (!ready) showFailure("The capture stopped before it finished.");
+    if (!ready) showFailure(t("editor.stoppedEarly"));
   });
 }
 
@@ -182,6 +199,7 @@ async function paintTile(msg) {
     // The bitmap comes back in device pixels; derive the ratio from the tile
     // itself so page zoom and HiDPI both land correctly.
     captureScale = bitmap.width / doc.meta.viewportW;
+    doc.meta.captureScale = captureScale;
     doc.width = Math.max(1, Math.round(doc.meta.full.w * captureScale));
     doc.height = Math.max(1, Math.round(doc.meta.full.h * captureScale));
     const base = document.createElement("canvas");
@@ -194,28 +212,123 @@ async function paintTile(msg) {
     updateDims();
   }
 
-  const s = captureScale;
   const bctx = doc.base.getContext("2d");
-  bctx.drawImage(
-    bitmap,
-    Math.round(msg.src.x * s),
-    Math.round(msg.src.y * s),
-    Math.round(msg.src.w * s),
-    Math.round(msg.src.h * s),
-    Math.round(msg.dest.x * s),
-    Math.round(msg.dest.y * s),
-    Math.round(msg.src.w * s),
-    Math.round(msg.src.h * s)
-  );
+  // One bitmap can land in more than one place: the first screen of a framed
+  // capture also supplies the strip that belongs at the foot of the image.
+  for (const part of msg.parts) placeTile(bctx, bitmap, part);
   bitmap.close();
   draw();
 }
 
+/**
+ * Copy one region of a tile onto the stitched canvas, pixel for pixel.
+ *
+ * Both edges of the destination are rounded, and the source is sized to match,
+ * rather than rounding an origin and a size independently. At a display scale
+ * of 125% or 150% that difference is a one-pixel unpainted line across the
+ * image at every other seam — a white thread through the screenshot, on the
+ * scaling most Windows machines are set to. Rounding the far edge also means
+ * the next tile starts exactly where this one ends.
+ *
+ * Nothing is ever resampled: the destination is the same number of device
+ * pixels as the source, so a screenshot stays as sharp as the screen it
+ * came from.
+ */
+function placeTile(bctx, bitmap, part) {
+  const s = captureScale;
+  const dx = Math.round(part.dest.x * s);
+  const dy = Math.round(part.dest.y * s);
+  const w = Math.max(1, Math.round((part.dest.x + part.src.w) * s) - dx);
+  const h = Math.max(1, Math.round((part.dest.y + part.src.h) * s) - dy);
+
+  // Keep the source inside the bitmap. Tiles overlap, so shifting back by the
+  // odd pixel repeats content that is identical either way.
+  const sx = Math.min(Math.max(0, Math.round(part.src.x * s)), Math.max(0, bitmap.width - w));
+  const sy = Math.min(Math.max(0, Math.round(part.src.y * s)), Math.max(0, bitmap.height - h));
+  const sw = Math.min(w, bitmap.width - sx);
+  const sh = Math.min(h, bitmap.height - sy);
+  if (sw < 1 || sh < 1) return;
+
+  bctx.drawImage(bitmap, sx, sy, sw, sh, dx, dy, sw, sh);
+}
+
+/**
+ * A sidebar is one screen tall however long the page is, so a framed capture has
+ * pixels for it beside the first screen and nothing beside the rest. Carry each
+ * side column down the image by repeating one row of it — the quietest row
+ * available, so a menu item does not get smeared down the page. Background,
+ * borders and gradients all survive that; the column reads as one tall panel.
+ */
+function extendFrame() {
+  const frame = doc.meta.frame;
+  if (!frame) return;
+  const s = captureScale;
+  const base = doc.base;
+  const ctx = base.getContext("2d");
+
+  const panelX = Math.round(frame.panel.x * s);
+  const panelRight = Math.round((frame.panel.x + frame.panel.w) * s);
+  const columns = [];
+  if (panelX > 0) columns.push({ x: 0, w: panelX });
+  if (panelRight < base.width) columns.push({ x: panelRight, w: base.width - panelRight });
+  if (!columns.length) return;
+
+  const from = Math.round((frame.top + frame.panel.h) * s); // bottom of the first screen
+  const to = base.height - Math.round(frame.bottom * s);
+  if (to <= from) return;
+
+  // Smoothing a one-pixel row across hundreds blends it with whatever the
+  // sampler reaches for at the edges; the column should be an exact copy.
+  ctx.imageSmoothingEnabled = false;
+  for (const col of columns) {
+    const row = quietestRow(ctx, col, from);
+    ctx.drawImage(base, col.x, row, col.w, 1, col.x, from, col.w, to - from);
+  }
+  ctx.imageSmoothingEnabled = true;
+  draw();
+}
+
+/**
+ * The most uniform row in the bottom third of a column: the one that repeats
+ * without leaving a readable streak behind.
+ *
+ * The whole search area is read in one go. The base canvas is drawn to far more
+ * often than it is read from, so it is left GPU-backed, and reading it a row at
+ * a time would drag every one of those rows back across the bus.
+ */
+function quietestRow(ctx, col, bottom) {
+  const top = Math.max(0, bottom - Math.max(1, Math.round(bottom / 3)));
+  const height = bottom - top;
+  if (height < 1 || col.w < 1) return Math.max(0, bottom - 1);
+
+  const { data } = ctx.getImageData(col.x, top, col.w, height);
+  const stride = col.w * 4;
+  let best = bottom - 1;
+  let bestScore = Infinity;
+  for (let row = height - 1; row >= 0; row -= 2) {
+    const start = row * stride;
+    let score = 0;
+    for (let i = start + 4; i < start + stride; i += 4) {
+      score +=
+        Math.abs(data[i] - data[i - 4]) +
+        Math.abs(data[i + 1] - data[i - 3]) +
+        Math.abs(data[i + 2] - data[i - 2]);
+    }
+    if (score < bestScore) {
+      bestScore = score;
+      best = top + row;
+      if (score === 0) break;
+    }
+  }
+  return best;
+}
+
 async function finishCapture() {
   if (!doc.base) {
-    showFailure("No pixels came back from this page.");
+    showFailure(t("editor.noPixels"));
     return;
   }
+  extendFrame();
   ready = true;
   $("progress").hidden = true;
   $("filename").value = resolveFilename(settings.filename, {
@@ -229,14 +342,17 @@ async function finishCapture() {
   updateDims();
   setStatus(
     doc.meta.truncated
-      ? "Page was taller than one image can hold — captured as much as fits."
-      : `Captured ${doc.width} × ${doc.height} px`
+      ? t("editor.status.truncated")
+      : t("editor.status.captured", { w: doc.width, h: doc.height })
   );
+  // 2× was asked for and the page could not take it. Say so where the size is
+  // reported, rather than leaving someone to wonder why it looks the same.
+  if (doc.meta.scaleDeclined) toast(t("editor.status.scaleDeclined"));
 
   if (settings.copyOnCapture) {
     try {
       await copyToClipboard(doc, settings);
-      toast("Copied to the clipboard");
+      toast(t("editor.copied"));
     } catch {
       /* the tab may not be focused yet; the Copy button still works */
     }
@@ -264,8 +380,8 @@ function showFailure(message) {
 
 function buildTools() {
   const nav = $("tools");
-  for (const t of TOOLS) {
-    if (t === "divider") {
+  for (const spec of TOOLS) {
+    if (spec === "divider") {
       const d = document.createElement("div");
       d.className = "tool-divider";
       nav.appendChild(d);
@@ -273,14 +389,135 @@ function buildTools() {
     }
     const b = document.createElement("button");
     b.className = "tool";
-    b.dataset.tool = t.id;
-    b.title = `${t.name} (${t.key})`;
-    b.setAttribute("aria-label", t.name);
-    b.setAttribute("aria-pressed", String(t.id === tool));
-    b.innerHTML = t.icon();
-    b.addEventListener("click", () => setTool(t.id));
+    b.dataset.tool = spec.id;
+    b.dataset.tipKey = `editor.tool.${spec.id}`;
+    b.dataset.hintKey = `editor.tool.${spec.id}.hint`;
+    b.dataset.key = spec.key;
+    b.dataset.tipSide = "right";
+    b.setAttribute("aria-label", t(`editor.tool.${spec.id}`));
+    b.setAttribute("aria-pressed", String(spec.id === tool));
+    b.innerHTML = spec.icon();
+    b.addEventListener("click", () => setTool(spec.id));
     nav.appendChild(b);
   }
+}
+
+/* --------------------------------------------------------------- tooltips */
+
+/**
+ * One floating card, driven by `data-tip` (name), `data-hint` (what it is for)
+ * and `data-key` (its shortcut). The point is finding the right tool without
+ * clicking through all of them, so it appears far sooner than a native tooltip,
+ * and instantly while moving along a row of controls.
+ *
+ * Name and hint each come in two flavours: `data-tip-key` is looked up in the
+ * catalogue, `data-tip` is used as it stands — for the things that are the same
+ * in every language, like a colour's hex or the letters PNG.
+ */
+const TIPPED = "[data-tip], [data-tip-key]";
+const tip = { el: null, target: null, timer: 0, warmUntil: 0 };
+const TIP_DELAY = 110;
+const TIP_WARM = 500;
+
+function initTooltips() {
+  tip.el = document.createElement("div");
+  tip.el.className = "tip";
+  tip.el.id = "tip";
+  tip.el.setAttribute("role", "tooltip");
+  tip.el.hidden = true;
+  document.body.appendChild(tip.el);
+
+  document.addEventListener("pointerover", (e) => {
+    if (e.pointerType === "touch") return;
+    const target = e.target instanceof Element ? e.target.closest(TIPPED) : null;
+    if (target === tip.target) return;
+    if (!target) return hideTip();
+    clearTimeout(tip.timer);
+    if (Date.now() < tip.warmUntil) showTip(target);
+    else tip.timer = setTimeout(() => showTip(target), TIP_DELAY);
+  });
+
+  // Anything that means "I am busy now" takes it away again.
+  document.addEventListener("pointerdown", () => hideTip(true), true);
+  document.addEventListener("focusin", (e) => {
+    const target = e.target instanceof Element ? e.target.closest(TIPPED) : null;
+    if (target) showTip(target);
+  });
+  document.addEventListener("focusout", () => hideTip());
+  window.addEventListener("blur", () => hideTip(true));
+  window.addEventListener("scroll", () => hideTip(true), true);
+  // Once the keyboard is in use — typing a file name, reaching for a shortcut —
+  // a hover hint is just something in the way.
+  window.addEventListener("keydown", () => hideTip(true), true);
+}
+
+function showTip(target) {
+  if (!tip.el || !target.isConnected || target.hasAttribute("disabled")) return;
+  clearTimeout(tip.timer);
+  tip.target = target;
+
+  const head = document.createElement("div");
+  head.className = "tip-head";
+  const name = document.createElement("span");
+  name.textContent = target.dataset.tipKey ? t(target.dataset.tipKey) : target.dataset.tip;
+  head.appendChild(name);
+  if (target.dataset.key) {
+    const key = document.createElement("kbd");
+    key.textContent = target.dataset.key;
+    head.appendChild(key);
+  }
+  tip.el.replaceChildren(head);
+  const hintText = target.dataset.hintKey ? t(target.dataset.hintKey) : target.dataset.hint;
+  if (hintText) {
+    const hint = document.createElement("p");
+    hint.textContent = hintText;
+    tip.el.appendChild(hint);
+  }
+
+  tip.el.hidden = false;
+  placeTip(target);
+  tip.el.classList.add("on");
+  target.setAttribute("aria-describedby", "tip");
+}
+
+function hideTip(immediate) {
+  clearTimeout(tip.timer);
+  if (!tip.el || tip.el.hidden) {
+    tip.target = null;
+    return;
+  }
+  // Moving along a toolbar should not re-run the delay every time.
+  tip.warmUntil = immediate ? 0 : Date.now() + TIP_WARM;
+  tip.el.classList.remove("on");
+  tip.el.hidden = true;
+  if (tip.target) tip.target.removeAttribute("aria-describedby");
+  tip.target = null;
+}
+
+function placeTip(target) {
+  const r = target.getBoundingClientRect();
+  const box = tip.el.getBoundingClientRect();
+  const gap = 9;
+  const pad = 8;
+
+  let side = target.dataset.tipSide || "bottom";
+  if (side === "right" && r.right + gap + box.width > window.innerWidth - pad) side = "left";
+  if (side === "left" && r.left - gap - box.width < pad) side = "bottom";
+  if (side === "bottom" && r.bottom + gap + box.height > window.innerHeight - pad) side = "top";
+
+  let left;
+  let top;
+  if (side === "right" || side === "left") {
+    left = side === "right" ? r.right + gap : r.left - gap - box.width;
+    top = r.top + r.height / 2 - box.height / 2;
+  } else {
+    left = r.left + r.width / 2 - box.width / 2;
+    top = side === "bottom" ? r.bottom + gap : r.top - gap - box.height;
+  }
+
+  const fit = (v, size, limit) => Math.max(pad, Math.min(v, limit - size - pad));
+  tip.el.style.left = `${Math.round(fit(left, box.width, window.innerWidth))}px`;
+  tip.el.style.top = `${Math.round(fit(top, box.height, window.innerHeight))}px`;
 }
 
 function buildSwatches() {
@@ -289,13 +526,15 @@ function buildSwatches() {
     const b = document.createElement("button");
     b.className = "swatch";
     b.style.background = c;
-    b.title = c;
+    b.dataset.swatch = c;
+    b.dataset.tip = c.toUpperCase();
+    b.dataset.hintKey = "editor.colour.hint";
     b.setAttribute("aria-label", `Colour ${c}`);
     b.setAttribute("aria-pressed", String(c === style.color));
     b.addEventListener("click", () => {
       style.color = c;
       persistStyle();
-      for (const s of wrap.children) s.setAttribute("aria-pressed", String(s.title === c));
+      for (const s of wrap.children) s.setAttribute("aria-pressed", String(s.dataset.swatch === c));
       const sel = selectionId && findShape(doc, selectionId);
       if (sel && sel.type !== "blur" && sel.type !== "pixelate") {
         snapshot(doc);
@@ -330,7 +569,7 @@ function syncInspector() {
   const sizeCtl = $("size").closest(".ctl");
   sizeCtl.hidden = !active;
   if (active) {
-    $("size-label").textContent = active.label;
+    $("size-label").textContent = t(active.label);
     $("size").min = active.min;
     $("size").max = active.max;
     $("size").value = style[active.key];
@@ -366,31 +605,12 @@ function wireChrome() {
     syncInspector();
   });
 
-  $("undo").addEventListener("click", () => {
-    if (undo(doc)) {
-      selectionId = null;
-      draw();
-      syncInspector();
-    }
-  });
-  $("redo").addEventListener("click", () => {
-    if (redo(doc)) {
-      selectionId = null;
-      draw();
-      syncInspector();
-    }
-  });
+  $("undo").addEventListener("click", () => stepHistory(undo));
+  $("redo").addEventListener("click", () => stepHistory(redo));
   $("delete").addEventListener("click", deleteSelection);
 
   $("crop-apply").addEventListener("click", applyCrop);
-  $("crop-reset").addEventListener("click", () => {
-    snapshot(doc);
-    doc.crop = null;
-    pendingCrop = null;
-    zoomFit();
-    buildRail();
-    updateDims();
-  });
+  $("crop-reset").addEventListener("click", resetCrop);
 
   $("zoom-in").addEventListener("click", () => setZoom(view.zoom * 1.25));
   $("zoom-out").addEventListener("click", () => setZoom(view.zoom / 1.25));
@@ -406,14 +626,7 @@ function wireChrome() {
   });
 
   $("save").addEventListener("click", () => save({}));
-  $("copy").addEventListener("click", async () => {
-    try {
-      await copyToClipboard(doc, settings);
-      toast("Copied to the clipboard");
-    } catch (err) {
-      toast(`Could not copy: ${err.message}`, true);
-    }
-  });
+  $("copy").addEventListener("click", copyImage);
   $("open-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
   $("failure-close").addEventListener("click", () => window.close());
 
@@ -434,9 +647,17 @@ function wireChrome() {
     const hit = hitTest(doc, p.x, p.y, 6 / view.zoom);
     if (hit && hit.type === "text") openTextInput(null, hit);
   });
+  // Clicking something unfocusable clears the focus, and the browser does that
+  // after the pointer handlers have run — which blurs the caption box the text
+  // tool has just opened, and blurring it is what commits it. So a click with
+  // the text tool armed used to open the box and shut it again in one frame.
+  canvas.addEventListener("mousedown", (e) => {
+    if (tool === "text" && e.button === 0) e.preventDefault();
+  });
   canvas.addEventListener("pointerdown", onPointerDown);
   canvas.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", onPointerUp);
+  document.addEventListener("contextmenu", onContextMenu);
   canvas.addEventListener("wheel", onWheel, { passive: false });
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", (e) => {
@@ -451,7 +672,7 @@ function paintFormat(value) {
   for (const b of $("format").querySelectorAll("button")) {
     b.setAttribute("aria-pressed", String(b.dataset.value === value));
   }
-  $("save").lastChild.textContent = ` Save ${value === "jpeg" ? "JPG" : value.toUpperCase()}`;
+  $("save").lastChild.textContent = ` ${t("editor.saveFormat", { format: value === "jpeg" ? "JPG" : value.toUpperCase() })}`;
 }
 
 function persistStyle() {
@@ -476,10 +697,10 @@ async function save({ silent } = {}) {
     const out = await buildOutput(doc, settings);
     const name = ($("filename").value || "screenshot").replace(/\.[a-z0-9]+$/i, "");
     const id = await saveBlob(out.blob, `${name}.${out.extension}`, !settings.autoDownload);
-    if (!silent) toast(`Saved ${name}.${out.extension} · ${humanSize(out.blob.size)}`);
+    if (!silent) toast(t("editor.saved", { name: `${name}.${out.extension}`, size: humanSize(out.blob.size) }));
     return id;
   } catch (err) {
-    toast(`Could not save: ${err.message}`, true);
+    toast(t("editor.saveFailed", { error: err.message }), true);
     return null;
   } finally {
     btn.disabled = false;
@@ -558,6 +779,9 @@ function draw() {
 
   const rect = viewRect(doc);
   const z = view.zoom * dpr;
+  // A full-page shot is shown at a third of its size or less, and the default
+  // sampler makes that look far worse than the file actually is.
+  ctx.imageSmoothingQuality = "high";
   ctx.setTransform(z, 0, 0, z, -view.pan.x * z, -view.pan.y * z);
 
   ctx.save();
@@ -791,8 +1015,10 @@ function onPointerUp() {
       removeShape(doc, s.id);
       dropSnapshot(doc); // the click never became a shape
     } else if (s) {
+      // The tool stays armed: annotating a screenshot means drawing the same
+      // kind of mark several times over. The new shape is selected all the
+      // same, so the colour and size controls act on it. Press V to stop.
       selectionId = s.id;
-      setTool("select");
     }
   }
   if (drag.kind === "crop-new" && pendingCrop && Math.abs(pendingCrop.w) < 8) pendingCrop = null;
@@ -806,23 +1032,6 @@ function isDegenerate(s) {
   if (s.type === "pen") return s.points.length < 6;
   const b = boundsOf(s);
   return b.w < 4 && b.h < 4;
-}
-
-function moveShape(s, dx, dy) {
-  if (s.type === "pen") {
-    for (let i = 0; i < s.points.length; i += 2) {
-      s.points[i] += dx;
-      s.points[i + 1] += dy;
-    }
-  } else if (ENDPOINTS.has(s.type)) {
-    s.x1 += dx;
-    s.y1 += dy;
-    s.x2 += dx;
-    s.y2 += dy;
-  } else {
-    s.x += dx;
-    s.y += dy;
-  }
 }
 
 function hitShapeHandle(s, p) {
@@ -882,11 +1091,171 @@ function onWheel(e) {
   draw();
 }
 
+/* --------------------------------------------------------- context menu */
+
+/**
+ * Right-click gets the editor's own menu rather than the browser's, because
+ * "Save image as…" over a screenshot that has not been cropped, annotated or
+ * even finished stitching yet would save the wrong thing entirely.
+ *
+ * What the menu offers depends on what is under the pointer: on a mark, the
+ * things that can be done to that mark; anywhere else, the things that can be
+ * done to the shot as a whole.
+ */
+function onContextMenu(e) {
+  // A file name or a caption keeps the browser's menu — it is the only way to
+  // reach the system clipboard from a text field.
+  if (e.target instanceof Element && e.target.closest("input, textarea")) return;
+  e.preventDefault();
+  if (drag) return; // mid-stroke; the release belongs to the drawing
+
+  const shape = pickForMenu(e);
+  openMenu(e.clientX, e.clientY, shape ? shapeMenu(shape) : imageMenu());
+}
+
+/** Right-clicking a mark selects it first, the way clicking one does — the menu
+ *  then names it, and the colour and size controls act on it too. */
+function pickForMenu(e) {
+  // Off the canvas — the toolbar, the rail, the status bar — the menu is about
+  // the shot, and the selection is left exactly as it was. Mid-crop it is about
+  // the crop: the marks underneath are not what is being worked on, and the
+  // menu is the second way to apply or drop the rectangle.
+  if (e.target !== canvas || !ready || tool === "crop") return null;
+  const p = eventPoint(e);
+  const hit = hitTest(doc, p.x, p.y, 6 / view.zoom);
+  if ((hit ? hit.id : null) !== selectionId) {
+    selectionId = hit ? hit.id : null;
+    draw();
+    syncInspector();
+  }
+  return hit;
+}
+
+function imageMenu() {
+  const format = settings.format === "jpeg" ? "JPG" : settings.format.toUpperCase();
+  return [
+    {
+      header: t("editor.menu.image"),
+      items: [
+        {
+          label: t("editor.menu.copyImage"),
+          key: "Ctrl+C",
+          icon: iconCopy(),
+          disabled: !ready,
+          run: copyImage,
+        },
+        {
+          label: t("editor.saveFormat", { format }),
+          key: "Ctrl+S",
+          icon: iconSave(),
+          disabled: !ready,
+          run: () => save({}),
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: t("editor.undo"),
+          key: "Ctrl+Z",
+          icon: iconUndo(),
+          disabled: !canUndo(doc),
+          run: () => stepHistory(undo),
+        },
+        {
+          label: t("editor.redo"),
+          key: "Ctrl+Shift+Z",
+          icon: iconRedo(),
+          disabled: !canRedo(doc),
+          run: () => stepHistory(redo),
+        },
+      ],
+    },
+    {
+      items: [
+        pendingCrop && {
+          label: t("editor.crop.apply.tip"),
+          key: "Enter",
+          icon: iconCrop(),
+          run: applyCrop,
+        },
+        doc.crop && { label: t("editor.crop.reset.tip"), icon: iconUncrop(), run: resetCrop },
+      ],
+    },
+    {
+      items: [
+        { label: t("editor.zoomFit"), key: "0", icon: iconFit(), disabled: !ready, run: zoomFit },
+        {
+          label: t("editor.zoomReset"),
+          icon: iconActual(),
+          disabled: !ready,
+          run: () => setZoom(1),
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: t("editor.settings"),
+          icon: iconGear(),
+          run: () => chrome.runtime.openOptionsPage(),
+        },
+      ],
+    },
+  ];
+}
+
+function shapeMenu(shape) {
+  return [
+    {
+      // The mark names itself, so there is no doubt which one the menu is about
+      // when several overlap.
+      header: t(`editor.tool.${shape.type}`),
+      items: [
+        shape.type === "text" && {
+          label: t("editor.menu.editText"),
+          icon: iconText(),
+          run: () => openTextInput(null, shape),
+        },
+        {
+          label: t("editor.menu.duplicate"),
+          key: "Ctrl+D",
+          icon: iconDuplicate(),
+          run: duplicateSelection,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: t("editor.menu.front"),
+          key: "]",
+          icon: iconFront(),
+          disabled: isFrontmost(doc, shape.id),
+          run: () => restackSelection(true),
+        },
+        {
+          label: t("editor.menu.back"),
+          key: "[",
+          icon: iconBack(),
+          disabled: isBackmost(doc, shape.id),
+          run: () => restackSelection(false),
+        },
+      ],
+    },
+    {
+      items: [
+        { label: t("editor.delete"), key: "Del", icon: iconTrash(), danger: true, run: deleteSelection },
+      ],
+    },
+  ];
+}
+
 /* ------------------------------------------------------------------ crop */
 
 function applyCrop() {
   if (!pendingCrop) {
-    toast("Drag a rectangle on the screenshot first");
+    toast(t("editor.crop.needRect"));
     return;
   }
   const cr = normRect(pendingCrop);
@@ -920,10 +1289,16 @@ function openTextInput(p, existing) {
   input.style.height = `${Math.max(28, size * 1.6 * view.zoom)}px`;
   input.focus();
 
+  // Hiding the box blurs it, and the blur is delivered before the assignment
+  // that follows — so a commit from the keyboard used to re-enter itself
+  // through its own blur handler and place the caption twice.
+  let closed = false;
   const commit = (save) => {
-    input.hidden = true;
+    if (closed) return;
+    closed = true;
     input.onblur = null;
     input.onkeydown = null;
+    input.hidden = true;
     const text = input.value.trim();
     if (!save) return draw();
     if (existing) {
@@ -941,7 +1316,6 @@ function openTextInput(p, existing) {
         color: style.color,
       });
       selectionId = shape.id;
-      setTool("select");
     }
     draw();
     syncInspector();
@@ -1033,14 +1407,21 @@ function onKeyDown(e) {
   }
   if (mod && e.key.toLowerCase() === "c") {
     e.preventDefault();
-    copyToClipboard(doc, settings).then(
-      () => toast("Copied to the clipboard"),
-      (err) => toast(`Could not copy: ${err.message}`, true)
-    );
+    copyImage();
+    return;
+  }
+  if (mod && e.key.toLowerCase() === "d") {
+    e.preventDefault();
+    duplicateSelection();
     return;
   }
   if (mod) return;
 
+  if (e.key === "]" || e.key === "[") {
+    e.preventDefault();
+    restackSelection(e.key === "]");
+    return;
+  }
   if (e.key === "Delete" || e.key === "Backspace") {
     e.preventDefault();
     deleteSelection();
@@ -1061,9 +1442,13 @@ function onKeyDown(e) {
   if (e.key === "-") return setZoom(view.zoom / 1.25);
   if (e.key === "0") return zoomFit();
 
-  const match = TOOLS.find((t) => t !== "divider" && t.key.toLowerCase() === e.key.toLowerCase());
+  const match = TOOLS.find((s) => s !== "divider" && s.key.toLowerCase() === e.key.toLowerCase());
   if (match) setTool(match.id);
 }
+
+/* ------------------------------------------------------------------ actions
+   Everything below is reachable from more than one place — the toolbar, a
+   shortcut, the context menu — so each lives once and is wired up three times. */
 
 function deleteSelection() {
   if (!selectionId) return;
@@ -1074,12 +1459,57 @@ function deleteSelection() {
   syncInspector();
 }
 
+function duplicateSelection() {
+  if (!selectionId) return;
+  snapshot(doc);
+  // Offset in image pixels, but sized by the zoom, so the copy lands a
+  // consistent distance away on screen however far in or out you are.
+  const copy = duplicateShape(doc, selectionId, Math.round(16 / view.zoom));
+  if (!copy) return dropSnapshot(doc);
+  selectionId = copy.id;
+  draw();
+  syncInspector();
+}
+
+function restackSelection(toFront) {
+  if (!selectionId) return;
+  snapshot(doc);
+  if (!raiseShape(doc, selectionId, toFront)) return dropSnapshot(doc);
+  draw();
+  syncInspector();
+}
+
+function stepHistory(step) {
+  if (!step(doc)) return;
+  selectionId = null;
+  draw();
+  syncInspector();
+}
+
+async function copyImage() {
+  try {
+    await copyToClipboard(doc, settings);
+    toast(t("editor.copied"));
+  } catch (err) {
+    toast(t("editor.copyFailed", { error: err.message }), true);
+  }
+}
+
+function resetCrop() {
+  snapshot(doc);
+  doc.crop = null;
+  pendingCrop = null;
+  zoomFit();
+  buildRail();
+  updateDims();
+}
+
 /* ------------------------------------------------------------------ misc */
 
 function updateDims() {
   const rect = viewRect(doc);
-  const cropped = doc.crop ? " · cropped" : "";
-  $("dims").textContent = `${Math.round(rect.w)} × ${Math.round(rect.h)} px${cropped}`;
+  const size = { w: Math.round(rect.w), h: Math.round(rect.h) };
+  $("dims").textContent = t(doc.crop ? "editor.dims.cropped" : "editor.dims", size);
 }
 
 function buildLadder(total) {
@@ -1092,6 +1522,22 @@ function updateLadder(done, total) {
   const rungs = $("ladder").children;
   const lit = Math.round((done / total) * rungs.length);
   for (let i = 0; i < rungs.length; i++) rungs[i].classList.toggle("on", i < lit);
+}
+
+/** The shortcut strip along the foot of the window. The keys are physical, so
+ *  only the words around them change language. */
+function paintHints() {
+  const kbd = (label) => `<kbd>${label}</kbd>`;
+  $("hints").innerHTML = t("editor.hints", {
+    v: kbd("V"),
+    c: kbd("C"),
+    a: kbd("A"),
+    t: kbd("T"),
+    b: kbd("B"),
+    space: kbd("Space"),
+    ctrl: kbd("Ctrl"),
+    s: kbd("S"),
+  });
 }
 
 function setStatus(text) {
@@ -1160,4 +1606,44 @@ function iconPixelate() {
 }
 function iconRedact() {
   return svg('<rect x="3.5" y="8" width="17" height="8" rx="1.5" fill="currentColor" stroke="none"/>');
+}
+
+/* The context menu's own set. Same weight as the tools, drawn a size smaller. */
+function iconCopy() {
+  return svg('<rect x="9" y="9" width="11.5" height="11.5" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>');
+}
+function iconSave() {
+  return svg('<path d="M12 4v11m0 0 4-4m-4 4-4-4"/><path d="M4 18v2h16v-2"/>');
+}
+function iconUndo() {
+  return svg('<path d="M8 8H4V4"/><path d="M4.5 8.5A8 8 0 1 1 4 12"/>');
+}
+function iconRedo() {
+  return svg('<path d="M16 8h4V4"/><path d="M19.5 8.5A8 8 0 1 0 20 12"/>');
+}
+function iconUncrop() {
+  return svg('<path d="M6 2v16h16"/><path d="M2 6h16v16"/><path d="m9 15 6-6M9 9l6 6"/>');
+}
+function iconFit() {
+  return svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 9 6 9v2M16 15h2v-2"/>');
+}
+function iconActual() {
+  return svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M11 10.5 12.5 9.5V15"/>');
+}
+function iconGear() {
+  return svg(
+    '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2 7 7M17 17l1.8 1.8M18.8 5.2 17 7M7 17l-1.8 1.8"/>'
+  );
+}
+function iconDuplicate() {
+  return svg('<rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M4 15V4h11"/><path d="M14.5 12v5M12 14.5h5"/>');
+}
+function iconFront() {
+  return svg('<rect x="3.5" y="3.5" width="12" height="12" rx="2" fill="currentColor" fill-opacity=".18"/><path d="M9 20.5h9a2.5 2.5 0 0 0 2.5-2.5V9"/>');
+}
+function iconBack() {
+  return svg('<rect x="8.5" y="8.5" width="12" height="12" rx="2" fill="currentColor" fill-opacity=".18"/><path d="M15 3.5H6A2.5 2.5 0 0 0 3.5 6v9"/>');
+}
+function iconTrash() {
+  return svg('<path d="M4 6.5h16"/><path d="M9.5 6.5V4h5v2.5"/><path d="M6.5 6.5 7.5 20h9l1-13.5"/><path d="M10.5 10v6M13.5 10v6"/>');
 }

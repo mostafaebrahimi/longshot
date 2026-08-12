@@ -202,3 +202,14 @@ main {
 .spacer {
   flex: 1;
 }
+
+/* ---------------------------------------------------------------------- rtl */
+
+[dir="rtl"] .icon {
+  margin-left: 0;
+  margin-right: auto;
+}
+[dir="rtl"] .capture {
+  text-align: right;
+  padding: 13px 14px 13px 13px;
+}

@@ -23,6 +23,7 @@ export class Pipe {
     this.out = child.stdio[3];
     this.id = 0;
     this.pending = new Map();
+    this.listeners = new Map(); // CDP method -> [fn(params, sessionId)]
     let buffer = "";
     child.stdio[4].on("data", (chunk) => {
       buffer += chunk.toString();
@@ -32,12 +33,23 @@ export class Pipe {
         buffer = buffer.slice(at + 1);
         if (!raw) continue;
         const msg = JSON.parse(raw);
+        if (msg.id === undefined) {
+          for (const fn of this.listeners.get(msg.method) || []) fn(msg.params, msg.sessionId);
+          continue;
+        }
         const p = this.pending.get(msg.id);
         if (!p) continue;
         this.pending.delete(msg.id);
         msg.error ? p.reject(new Error(msg.error.message)) : p.resolve(msg.result);
       }
     });
+  }
+
+  /** Subscribe to a CDP event, e.g. `Log.entryAdded`. */
+  on(method, fn) {
+    const list = this.listeners.get(method) || [];
+    list.push(fn);
+    this.listeners.set(method, list);
   }
 
   send(method, params = {}, sessionId) {
