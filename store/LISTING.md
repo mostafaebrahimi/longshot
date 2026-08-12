@@ -3,6 +3,9 @@
 Everything the Developer Dashboard asks for, ready to paste. Fields are in the
 order the dashboard presents them.
 
+The Firefox listing shares this description and these screenshots; the fields
+AMO asks for differently are in [`LISTING-FIREFOX.md`](LISTING-FIREFOX.md).
+
 ---
 
 ## Store listing tab
@@ -92,11 +95,14 @@ capture tools sit.)_
 | Store icon | 128×128 | `icons/icon-128.png` |
 | Screenshot 1 | 1280×800 | `store/screenshots/01-editor-fresh.png` |
 | Screenshot 2 | 1280×800 | `store/screenshots/02-editor-annotated.png` |
-| Screenshot 3 | 1280×800 | `store/screenshots/03-editor-zoomed.png` |
+| Screenshot 3 | 1280×800 | `store/screenshots/03-editor-menu.png` |
 | Screenshot 4 | 1280×800 | `store/screenshots/04-popup.png` |
 | Screenshot 5 | 1280×800 | `store/screenshots/05-options.png` |
 | Small promo tile | 440×280 | `store/promo/small-tile.png` |
 | Marquee promo tile | 1400×560 | `store/promo/marquee.png` |
+
+Five is the most Chrome takes, so `06-editor-zoomed.png` is not uploaded here —
+it is for the AMO listing, which has no practical limit.
 
 Regenerate all of them with:
 

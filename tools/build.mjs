@@ -29,9 +29,11 @@ const ICON_SIZES = [16, 32, 48, 128];
 
 const GECKO = {
   id: "longshot@mostafaebrahimi.me",
-  // 128 ESR: MV3 event pages, scripting, and clipboard image writes all landed
-  // well before it, and it is what AMO reviewers test against.
-  strict_min_version: "128.0",
+  // MV3 event pages, scripting, and clipboard image writes all landed well
+  // before this. 140 rather than the older 128 ESR because that is where
+  // data_collection_permissions below started being read — declaring it against
+  // an earlier floor is what AMO's own linter warns about.
+  strict_min_version: "140.0",
   // AMO makes every add-on declare this. Longshot collects nothing.
   data_collection_permissions: { required: ["none"] },
 };
@@ -53,6 +55,7 @@ const TARGETS = {
     next: [
       "Next: upload that zip at https://addons.mozilla.org/developers/addon/submit/distribution",
       "      lint it first with: npx web-ext lint --source-dir dist/package-firefox",
+      "      listing copy and reviewer notes are in store/LISTING-FIREFOX.md",
     ],
   },
 };
@@ -113,7 +116,12 @@ function geckoManifest(m) {
   delete out.options_page;
   out.background = { scripts: [m.background.service_worker], type: "module" };
   out.options_ui = { page: m.options_page, open_in_tab: true };
-  out.browser_specific_settings = { gecko: { ...GECKO } };
+  out.browser_specific_settings = {
+    gecko: { ...GECKO },
+    // Android read data_collection_permissions two releases later than desktop.
+    // Without its own floor the linter measures the key against the desktop one.
+    gecko_android: { strict_min_version: "142.0" },
+  };
   return out;
 }
 

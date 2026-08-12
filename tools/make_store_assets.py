@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Compose the Chrome Web Store listing images from the raw UI screenshots.
+"""Compose the store listing images from the raw UI screenshots.
 
 Run tools/capture-ui.mjs first — this only frames what that produced.
 
 Outputs
-  store/screenshots/01..05-*.png   1280x800 listing screenshots
+  store/screenshots/01..06-*.png   1280x800 listing screenshots
   store/promo/small-tile.png       440x280  required promo tile
   store/promo/marquee.png          1400x560 optional marquee
+
+The Chrome Web Store takes the first five; addons.mozilla.org takes all six.
 """
 from pathlib import Path
 
@@ -45,11 +47,11 @@ SLIDES = [
         "Arrows, text, numbered steps and highlights — plus blur for anything private.",
     ),
     (
-        "editor-zoomed",
+        "editor-menu",
         "wide",
         "03",
-        "Crop, zoom, and land on the detail",
-        "The rail on the right keeps your place in a screenshot ten screens long.",
+        "Right-click knows what it is looking at",
+        "Over a mark the menu names it and offers what applies. Over the shot: copy, save, crop, zoom.",
     ),
     (
         "popup",
@@ -63,7 +65,16 @@ SLIDES = [
         "wide",
         "05",
         "Tuned for stubborn pages",
-        "Pre-scroll for lazy images, hide sticky bars, and give slow pages more time.",
+        "Pre-scroll for lazy images, hide sticky bars, capture at 2x, and give slow pages more time.",
+    ),
+    # Chrome takes five screenshots at most, so this one is for AMO, which takes
+    # ten. Keep it last: the numbering is the upload order on both stores.
+    (
+        "editor-zoomed",
+        "wide",
+        "06",
+        "Crop, zoom, and land on the detail",
+        "The rail on the right keeps your place in a screenshot ten screens long.",
     ),
 ]
 

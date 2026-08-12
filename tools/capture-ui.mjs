@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Shoots the product screenshots used for the Chrome Web Store listing and the
- * README: the editor mid-capture and annotated, the popup, and the options page.
- * Everything is rendered by the real extension — no mockups.
+ * Shoots the product screenshots used for both store listings and the README:
+ * the editor holding a capture, annotated, with its right-click menu open and
+ * zoomed in, plus the popup and the options page. Everything is rendered by the
+ * real extension — no mockups.
  *
  *   CHROME_BIN=... node tools/capture-ui.mjs
  *
@@ -76,8 +77,27 @@ try {
   await sleep(400);
   await shoot(editor, "editor-annotated", "annotation tools on top of the capture");
 
-  // Zoomed in, so the toolbar and rail read clearly.
+  // The editor's own right-click menu, opened over the numbered step so the
+  // menu names the mark. `view` maps an image point back to a client one.
   await editor.eval(`(() => {
+    const {doc, view} = window.longshot;
+    const canvas = document.getElementById("view");
+    const rect = canvas.getBoundingClientRect();
+    const step = doc.shapes.find((s) => s.id === 901);
+    canvas.dispatchEvent(new MouseEvent("contextmenu", {
+      bubbles: true,
+      clientX: rect.left + (step.x - view.pan.x) * view.zoom,
+      clientY: rect.top + (step.y - view.pan.y) * view.zoom,
+    }));
+  })()`);
+  await sleep(400);
+  await waitUntil(editor, `!!document.querySelector("#menu.on")`, 5000);
+  await shoot(editor, "editor-menu", "the editor's own right-click menu, over a mark");
+
+  // Zoomed in, so the toolbar and rail read clearly. Escape puts the menu away
+  // first — a programmatic click never fires the pointerdown that dismisses it.
+  await editor.eval(`(() => {
+    document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
     document.getElementById("zoom-in").click();
     document.getElementById("zoom-in").click();
     document.querySelector('[data-tool="blur"]').click();

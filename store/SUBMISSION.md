@@ -5,6 +5,9 @@ A screen-by-screen runbook. Exact values to paste are in
 
 Budget about 30 minutes for the first submission, then a few days of review.
 
+For Firefox, the equivalent runbook is [`LISTING-FIREFOX.md`](LISTING-FIREFOX.md).
+The two stores are independent: either can go live first.
+
 ---
 
 ## 0 · Before you open the dashboard
@@ -55,8 +58,9 @@ Paste from `LISTING.md` § *Store listing tab*:
 
 Then upload graphics:
 
-- **Screenshots** — all five from `store/screenshots/`, in numbered order. The
-  first one is the thumbnail in search results, so keep `01` first.
+- **Screenshots** — `01` to `05` from `store/screenshots/`, in numbered order.
+  The first one is the thumbnail in search results, so keep `01` first. (`06` is
+  for the AMO listing; five is the most Chrome takes.)
 - **Small promo tile** — `store/promo/small-tile.png` (required)
 - **Marquee promo tile** — `store/promo/marquee.png` (optional; needed if you
   ever want to be featured)
@@ -137,13 +141,20 @@ the dashboard — nothing else references it.
 
 ## Shipping an update later
 
+Once the item exists and the four `CWS_*` secrets are set, CI does this — see
+[`../.github/workflows/release.yml`](../.github/workflows/release.yml):
+
 1. Bump `version` in `manifest.json` (the store rejects a re-upload of the same
    version number)
 2. Add the entry to `CHANGELOG.md`
-3. `node tools/build.mjs`
-4. Regenerate screenshots if the UI changed:
+3. Regenerate screenshots if the UI changed:
    `node tools/capture-ui.mjs && python3 tools/make_store_assets.py`
-5. Dashboard → your item → **Package → Upload new package** → Submit
+4. Commit, then `git tag v<version> && git push origin v<version>`
+
+The workflow packs both stores, lints the Firefox package, runs the smoke test,
+and uploads only if all of that passed. To do it by hand instead:
+`node tools/build.mjs`, then dashboard → your item → **Package → Upload new
+package** → Submit.
 
 Adding a permission re-triggers a full review and requires a new justification
 row in `LISTING.md`. Removing one does not.
