@@ -168,6 +168,6 @@ nothing from anywhere else.
 
 ## Contact
 
-Questions, privacy requests, or a security report: <longshot@mostafaebrahimi.me>,
+Questions, privacy requests, or a security report: <devepoler001@gmail.com>,
 or the Support tab on the Chrome Web Store listing, or the Support section of
 the addons.mozilla.org listing.
