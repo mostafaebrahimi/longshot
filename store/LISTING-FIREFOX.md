@@ -85,9 +85,24 @@ AMO asks in two places, and they have to agree:
 
 1. **In the manifest** — `browser_specific_settings.gecko.data_collection_permissions`
    is set to `{ "required": ["none"] }` by `tools/build.mjs`. AMO reads it and
-   shows "This add-on does not collect any data" on the listing.
+   shows "This add-on does not collect any data" on the listing, and Firefox
+   shows the same line in the install prompt and under **Permissions and data**
+   in `about:addons`.
 2. **On the submission form** — confirm the same: no data collected, none
    transmitted.
+
+Since **3 November 2025** every new add-on has had to declare this key, and AMO
+rejects a submission at signing time if it is missing or wrong. `none` is what
+an add-on that collects nothing must say — leaving the key out is not the same
+statement. The key is read from Firefox **140** on desktop and **142** on
+Android, which is what the two `strict_min_version` floors in `build.mjs` are
+for: below them an add-on has to hand the user its own consent control instead,
+and Longshot would rather not ship one it does not need.
+
+Mozilla's own policies do not oblige every add-on to publish a privacy policy,
+but they do require that the listing plainly describe what the add-on does and
+what it transmits, and that no data leave the browser beyond what its stated
+function needs. Longshot transmits nothing, and links the policy anyway.
 
 **Privacy policy** — paste:
 
@@ -95,8 +110,10 @@ AMO asks in two places, and they have to agree:
 https://longshot-privacy.surge.sh
 ```
 
-The same page the Chrome listing points at, served from `docs/`. See
-[`SUBMISSION.md`](SUBMISSION.md) § 5 for how to redeploy it.
+The same page the Chrome listing points at, served from `docs/`. It is written
+for both stores — it names this add-on's Firefox distribution and the `none`
+declaration explicitly. See [`SUBMISSION.md`](SUBMISSION.md) § 5 for how to
+redeploy it.
 
 ---
 

@@ -78,11 +78,28 @@ This is the tab that decides how fast review goes. Three sections:
    LISTING.md has a table with the exact text for `activeTab`, `scripting`,
    `storage`, `downloads`, `contextMenus`, and `clipboardWrite`. Fill in every
    box; a blank one is the single most common cause of a rejection.
-3. **Data usage** — tick **nothing**, then tick all three certifications at the
-   bottom. Longshot collects no user data, and the reviewer can verify that:
-   the package makes no network requests at all.
+3. **Data usage** — tick **nothing** in the first group of checkboxes, then tick
+   every certification in the second. Longshot collects no user data, and the
+   reviewer can verify that: the package talks to no server at all.
 
 Paste the privacy policy URL from step 5 into **Privacy policy URL**.
+
+Google's [2026 policy
+update](https://developer.chrome.com/blog/cws-policy-updates-2026) has been
+enforced since **1 August 2026**. Three parts of it bear on this tab, and the
+policy at step 5 is written to satisfy all three:
+
+- Collected data must be **strictly necessary** to the disclosed single purpose.
+- **All** collection must be prominently disclosed — including data that is only
+  processed or stored locally, which is why the policy names the settings, the
+  file name template, and the clipboard rather than stopping at "collects
+  nothing".
+- Changes to data handling must be disclosed to users **proactively**, not
+  quietly folded into a later revision.
+
+The disclosures and the Limited Use certification are required of every item
+before it can be published or updated; leaving them incomplete draws a warning,
+then suspension.
 
 ---
 
@@ -121,6 +138,13 @@ Same URL, new content, live in a few seconds. Keep `store/PRIVACY.md` (the
 markdown copy) in step with the HTML, and move the "Last updated" date whenever
 the substance changes — Google re-checks the URL after publication, and a policy
 that contradicts the listing's data disclosures is a takedown risk.
+
+The same page is the privacy policy for the Firefox listing, so it is written to
+answer both stores: the nine Chrome data categories as a table, the Firefox
+`data_collection_permissions` declaration, the Limited Use statement Google asks
+developers to publish, permissions with justifications, deletion steps, and a
+contact address. Anything added to one listing's disclosures has to land there
+too.
 
 The surge account is under the email used at deploy time; the login is never
 shown publicly, and the URL contains no personal identifier. To move the page

@@ -6,8 +6,9 @@
     <title>Longshot — Privacy Policy</title>
     <meta
       name="description"
-      content="Privacy policy for Longshot, a Chrome extension that captures full page screenshots locally."
+      content="Privacy policy for Longshot, the full page screenshot extension for Chrome and Firefox. No data collected, no servers, nothing leaves the browser."
     />
+    <meta name="robots" content="index, follow" />
     <style>
       :root {
         --bg: #ffffff;
@@ -16,6 +17,7 @@
         --fg: #1b1d21;
         --dim: #5c626c;
         --accent: #d2611a;
+        --ok: #2f7d4f;
         color-scheme: light;
       }
       @media (prefers-color-scheme: dark) {
@@ -26,6 +28,7 @@
           --fg: #e8eaed;
           --dim: #a3a9b4;
           --accent: #ff8a3d;
+          --ok: #5fbf87;
           color-scheme: dark;
         }
       }
@@ -57,12 +60,27 @@
       h2:first-of-type { border-top: 0; padding-top: 0; }
       p { margin: 0 0 14px; color: var(--dim); }
       strong { color: var(--fg); font-weight: 600; }
-      .lede { font-size: 17px; }
+      ul { margin: 0 0 14px; padding-left: 20px; color: var(--dim); }
+      li { margin: 0 0 6px; }
       .callout {
         padding: 16px 18px; border-radius: 10px; background: var(--panel);
         border: 1px solid var(--line); margin: 0 0 8px;
       }
       .callout p:last-child { margin-bottom: 0; }
+      .scroll { overflow-x: auto; margin: 0 0 16px; }
+      table { border-collapse: collapse; width: 100%; font-size: 14px; }
+      th, td {
+        text-align: left; padding: 9px 12px 9px 0;
+        border-bottom: 1px solid var(--line); vertical-align: top; color: var(--dim);
+      }
+      th { color: var(--fg); font-weight: 600; white-space: nowrap; }
+      td:first-child { color: var(--fg); }
+      .no { color: var(--ok); font-weight: 600; white-space: nowrap; }
+      code {
+        font-family: ui-monospace, "SF Mono", Consolas, monospace;
+        font-size: 0.88em; background: var(--panel);
+        border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
+      }
       footer {
         margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line);
         font-size: 13px; color: var(--dim);
@@ -76,78 +94,212 @@
         <img src="icon-128.png" alt="" />
         <div>
           <h1>Longshot — Privacy Policy</h1>
-          <p class="eyebrow">Last updated 11 August 2026</p>
+          <p class="eyebrow">Last updated 12 August 2026</p>
         </div>
       </header>
 
       <div class="callout">
         <p>
           <strong>Longshot collects nothing.</strong> It has no account, no server, no analytics,
-          and no code that makes a network request. Screenshots are built and stay inside your own
-          browser.
+          and no code that calls out to a remote endpoint. Screenshots are built and stay inside
+          your own browser, and the only thing kept between sessions is your own settings.
         </p>
       </div>
 
-      <h2>What Longshot handles, and where</h2>
+      <h2>Who and what this covers</h2>
       <p>
-        <strong>Page pixels.</strong> When you start a capture, Longshot asks Chrome for images of
-        the visible part of the tab, one screen at a time, and draws them onto a canvas inside an
-        extension tab in your browser. That image lives in the memory of that tab. It is written to
-        disk only when you click Save, into the folder Chrome downloads to. Closing the tab
-        discards it.
-      </p>
-      <p>
-        <strong>Your settings.</strong> Output format, file name template, capture delay, theme, and
-        the annotation colour you last used are stored with Chrome's storage API in your Chrome
-        profile. With Chrome sync switched on, Google syncs them between your own devices the same
-        way it syncs bookmarks. The developer of Longshot has no access to them.
-      </p>
-      <p>
-        <strong>Clipboard.</strong> If you press Copy, the screenshot is placed on your system
-        clipboard. Nothing else touches it.
+        This policy covers <strong>Longshot — Full Page Screenshot</strong>, published by Mostafa
+        Ebrahimi, in both of its distributions: the extension on the
+        <strong>Chrome Web Store</strong> (Chrome and other Chromium browsers) and the add-on on
+        <strong>addons.mozilla.org</strong> (Firefox, desktop and Android). Both builds ship the
+        same code; only the manifest differs. Whatever browser you installed it in, everything
+        below applies.
       </p>
 
-      <h2>What Longshot can read</h2>
+      <h2>Single purpose</h2>
       <p>
-        Longshot uses the <strong>activeTab</strong> permission. It can only read a page after you
+        Longshot captures a screenshot of the page you are on — the full scrollable page or the
+        visible area — and lets you crop, annotate, and save it as PNG, JPG, or PDF. Every step
+        runs on your own device. Nothing in the extension exists to gather, profile, or monetise
+        anything about you.
+      </p>
+
+      <h2>Data Longshot collects</h2>
+      <p>
+        None, in every category the two stores ask about. Longshot does not collect, transmit,
+        sell, or share any of the following — not to the developer, not to a third party, not to
+        anyone:
+      </p>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Collected?</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Personally identifiable information</td><td class="no">No</td><td>No name, address, email, age, or ID number is ever asked for.</td></tr>
+            <tr><td>Health information</td><td class="no">No</td><td>—</td></tr>
+            <tr><td>Financial and payment information</td><td class="no">No</td><td>Longshot is free and takes no payment.</td></tr>
+            <tr><td>Authentication information</td><td class="no">No</td><td>No accounts, passwords, tokens, or cookies are read or stored.</td></tr>
+            <tr><td>Personal communications</td><td class="no">No</td><td>—</td></tr>
+            <tr><td>Location</td><td class="no">No</td><td>No geolocation, IP lookup, or region detection.</td></tr>
+            <tr><td>Web history</td><td class="no">No</td><td>No record is kept of pages you visit or capture.</td></tr>
+            <tr><td>User activity</td><td class="no">No</td><td>No clicks, keystrokes, telemetry, analytics, or crash reports.</td></tr>
+            <tr><td>Website content</td><td class="no">No</td><td>Page pixels are rendered on your device and never sent anywhere. See below.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The Firefox package declares the same thing in machine-readable form: its manifest sets
+        <code>data_collection_permissions</code> to <code>{ "required": ["none"] }</code>, which is
+        why Firefox and addons.mozilla.org state that this add-on does not collect any data. The
+        Chrome Web Store listing's privacy disclosures say the same, and this page is the policy
+        those disclosures point at.
+      </p>
+
+      <h2>What Longshot handles on your device</h2>
+      <p>
+        Data being handled locally is still worth naming, so here is everything Longshot touches
+        and where it ends up. All of it stays on your machine.
+      </p>
+      <p>
+        <strong>Page pixels.</strong> When you start a capture, Longshot asks the browser for images
+        of the visible part of the tab, one screen at a time, and draws them onto a canvas inside an
+        extension tab in your browser. That image lives in the memory of that tab. It is written to
+        disk only when you save it, into the folder your browser downloads to. Closing the tab
+        discards it. It is never uploaded, and no copy is kept anywhere else.
+      </p>
+      <p>
+        <strong>Your settings.</strong> Output format, quality, PDF page mode, scale, file name
+        template, capture delay and other capture options, language, and theme are stored with the
+        browser's <code>storage.sync</code> API; the annotation style you last used is stored with
+        <code>storage.local</code>. These values live in your browser profile. If you have browser
+        sync switched on, Google or Mozilla syncs them between your own devices the same way they
+        sync your bookmarks — the developer of Longshot has no access to them at any point.
+      </p>
+      <p>
+        <strong>File names.</strong> The default name template includes the page title and date, and
+        you can add the URL or host. That name is used for the file your browser saves, so whatever
+        you put in the template ends up in your own downloads folder — and nowhere else.
+      </p>
+      <p>
+        <strong>Clipboard.</strong> If you choose Copy, the screenshot is placed on your system
+        clipboard. Longshot writes to the clipboard; it never reads it.
+      </p>
+
+      <h2>Permissions, and why each one is there</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Permission</th><th>Why Longshot asks for it</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>activeTab</code></td><td>Temporary access to the tab you are on, granted only when you start a capture there.</td></tr>
+            <tr><td><code>scripting</code></td><td>Injects the capture agent into that tab to measure the page and scroll it while tiles are taken.</td></tr>
+            <tr><td><code>storage</code></td><td>Saves your settings and last-used annotation style in your own profile.</td></tr>
+            <tr><td><code>downloads</code></td><td>Writes the finished image or PDF to your downloads folder when you save it.</td></tr>
+            <tr><td><code>contextMenus</code></td><td>Adds the right-click entries that start a capture.</td></tr>
+            <tr><td><code>clipboardWrite</code></td><td>Puts the screenshot on your clipboard when you press Copy.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Longshot requests <strong>no host permissions</strong> and no access to
+        <code>&lt;all_urls&gt;</code>, so it has no standing access to any website and cannot read
+        pages in the background. Under <code>activeTab</code> it can read a page only after you
         explicitly start a capture on it — by clicking the toolbar icon, pressing a keyboard
-        shortcut, or choosing Longshot from the right-click menu. It has no standing access to any
-        website, cannot read pages in the background, and requests no host permissions for any
-        domain.
+        shortcut, or choosing Longshot from the right-click menu — and that access lapses when the
+        capture is done.
       </p>
       <p>
         While a capture runs, Longshot temporarily scrolls the page and hides sticky or floating
-        elements so they do not repeat down the image. Both are undone when the capture ends.
+        elements so they do not repeat down the image. Both are undone when the capture ends. The
+        page itself is not modified in any lasting way and nothing is read from it beyond what is
+        needed to assemble the picture you asked for.
       </p>
 
-      <h2>Data sharing</h2>
+      <h2>Data sharing, sale, and advertising</h2>
       <p>
-        There is none. No data is sold, transferred, or disclosed to any third party, because none
-        is collected in the first place.
+        There is none. No data is sold, rented, transferred, or disclosed to any third party — no
+        advertisers, no data brokers, no analytics providers, no AI services, no credit or lending
+        assessment — because none is collected in the first place. Nothing is used for
+        personalised advertising, and no human, including the developer, has any way to review
+        your screenshots or your browsing.
+      </p>
+      <p>
+        Longshot bundles no third-party SDKs, no remote code, and no hosted fonts or scripts. It
+        works fully offline.
+      </p>
+
+      <h2>Chrome Web Store Limited Use</h2>
+      <p>
+        Longshot's use of information received from Google APIs adheres to the
+        <a href="https://developer.chrome.com/docs/webstore/program-policies/limited-use">Chrome
+        Web Store User Data Policy</a>, including the Limited Use requirements. Longshot receives
+        no user data from Google APIs, and any data it handles is limited to what is strictly
+        necessary for the single purpose stated above.
+      </p>
+
+      <h2>Retention, and how to delete everything</h2>
+      <p>
+        Because nothing is transmitted, there is no server-side data to retain, request, or erase.
+        On your device:
+      </p>
+      <ul>
+        <li>Screenshots are held only in the memory of the editor tab. Closing the tab discards
+          them. Files you saved are ordinary files in your downloads folder, yours to delete.</li>
+        <li>Settings can be wiped at any time with <strong>Reset to defaults</strong> on Longshot's
+          options page.</li>
+        <li>Removing the extension — <code>chrome://extensions</code> or
+          <code>about:addons</code> — deletes its stored settings along with it.</li>
+      </ul>
+
+      <h2>Security</h2>
+      <p>
+        The strongest guarantee an extension can offer is not to hold the data at all, and that is
+        the design here: no endpoint to intercept, no database to breach, no credentials to leak.
+        What remains on your device is protected by your browser profile and your operating
+        system's own account protections.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        Privacy laws such as the GDPR and the CCPA give you rights to access, correct, export, or
+        delete personal data a service holds about you, and to know whether it is sold or shared.
+        Longshot holds no personal data about you, sells nothing, and shares nothing, so there is
+        nothing to request — and no request could identify you in the first place. The delete steps
+        above put you in full control of everything that exists. You are welcome to write with any
+        question about this regardless.
       </p>
 
       <h2>Children</h2>
       <p>
-        Longshot is a general-purpose utility. It is not directed at children and collects no
-        information from anyone, including children.
+        Longshot is a general-purpose utility. It is not directed at children, and it collects no
+        information from anyone, including children under 13.
       </p>
 
-      <h2>Changes</h2>
+      <h2>Changes to this policy</h2>
       <p>
-        If a future version changes what data is handled, this policy is updated in the same release
-        and the date at the top changes with it.
-      </p>
-
-      <h2>Contact</h2>
-      <p>
-        Questions or a security report: use the Support tab on the Longshot listing in the
-        Chrome Web Store.
+        If a future version changes what data is handled, the change is disclosed here in the same
+        release, the date at the top moves with it, and the store listings' privacy disclosures are
+        updated to match. Should Longshot ever begin collecting anything at all — it has no plans
+        to — that would be disclosed prominently and asked for up front, in the extension itself,
+        before any collection began, rather than being buried in a revision to this page. Version
+        history is public in the project's changelog.
       </p>
 
       <h2>This page</h2>
       <p>
-        This policy page is static: it sets no cookies, runs no scripts, and loads nothing from
-        anywhere else.
+        This policy page is static: it sets no cookies, runs no scripts, loads nothing from anywhere
+        else, and logs nothing about you beyond whatever access records the static host keeps by
+        default.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions, privacy requests, or a security report:
+        <a href="mailto:longshot@mostafaebrahimi.me">longshot@mostafaebrahimi.me</a>. You can also
+        use the Support tab on the Chrome Web Store listing or the Support section of the
+        addons.mozilla.org listing. Security reports are welcome and answered.
       </p>
 
       <footer>Longshot is free to use. © 2026 Longshot — all rights reserved.</footer>

@@ -126,6 +126,19 @@
   Chrome takes five, so it gets the first five; AMO takes all six
 - Privacy policy published at https://longshot-privacy.surge.sh, served from
   `docs/` (redeploy with `npx surge ./docs`)
+- The privacy policy now answers both stores against their current rules, rather
+  than reading as a Chrome-only note. It covers the Firefox add-on by name and
+  the `data_collection_permissions: { required: ["none"] }` declaration AMO has
+  required of new add-ons since November 2025; it answers Chrome's nine data
+  categories one by one in a table, since the Web Store's August 2026 policy
+  update wants every kind of collection disclosed prominently — local handling
+  included, which is why the settings, the file name template, and the clipboard
+  are named individually; it carries the Limited Use statement Google asks
+  developers to publish, a permission-by-permission justification, retention and
+  deletion steps, a GDPR/CCPA answer, a contact address, and an undertaking to
+  disclose any future change in data handling up front rather than by quietly
+  editing the page. `store/PRIVACY.md` tracks it, and both listing runbooks say
+  what the two stores now check
 - Editor fits captures to the stage width instead of the whole height, so a long
   screenshot opens readable rather than shrunk to a sliver
 - Page rail sizes itself to the capture's aspect ratio
