@@ -83,16 +83,21 @@ def font(path: str, size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(path, size)
 
 
-def backdrop(w: int, h: int) -> Image.Image:
-    """Graphite field with one warm glow — the same air as the editor stage."""
+def backdrop(w: int, h: int, scale: int = 1, glow: tuple = (-0.25, -0.55, 0.55, 0.45)) -> Image.Image:
+    """Graphite field with one warm glow — the same air as the editor stage.
+
+    `glow` is the ellipse as fractions of the canvas, so a centred lockup can
+    sit in the light instead of off to one side of it. `scale` keeps the dot
+    grid the same size to the eye on a canvas drawn at 2x.
+    """
     img = Image.new("RGB", (w, h), INK)
-    glow = Image.new("RGB", (w, h), INK)
-    gd = ImageDraw.Draw(glow)
-    gd.ellipse((-w * 0.25, -h * 0.55, w * 0.55, h * 0.45), fill=(58, 34, 18))
-    img = Image.blend(img, glow.filter(ImageFilter.GaussianBlur(w // 8)), 0.85)
+    layer = Image.new("RGB", (w, h), INK)
+    gd = ImageDraw.Draw(layer)
+    gd.ellipse((glow[0] * w, glow[1] * h, glow[2] * w, glow[3] * h), fill=(58, 34, 18))
+    img = Image.blend(img, layer.filter(ImageFilter.GaussianBlur(w // 8)), 0.85)
 
     dots = ImageDraw.Draw(img)
-    step = 28
+    step = 28 * scale
     for y in range(0, h, step):
         for x in range(0, w, step):
             dots.point((x, y), fill=(30, 33, 39))
@@ -212,6 +217,48 @@ def marquee() -> Image.Image:
     return canvas
 
 
+def readme_banner() -> Image.Image:
+    """The header at the top of README.md: the lockup on its own, centred.
+
+    Drawn at 2x and shown at half that, so it stays sharp on a HiDPI screen.
+    Nothing but the brand goes in it — the screenshot below it in the README is
+    the product shot, and two images fighting for the top of a page is one too
+    many.
+    """
+    S = 2
+    W, H = 1280 * S, 340 * S
+    canvas = backdrop(W, H, scale=S, glow=(0.18, -0.9, 0.82, 0.7))
+    d = ImageDraw.Draw(canvas)
+
+    icon = Image.open(ROOT / "icons/icon-512.png").resize((88 * S, 88 * S), Image.LANCZOS)
+    canvas.paste(icon, ((W - icon.width) // 2, 46 * S), icon)
+
+    d.text((W // 2, 152 * S), "Longshot", font=font(DISPLAY, 64 * S), fill=FG, anchor="mt")
+    d.text(
+        (W // 2, 232 * S),
+        "FULL PAGE SCREENSHOT  ·  CHROME & FIREFOX",
+        font=font(MONO, 15 * S),
+        fill=(150, 110, 78),
+        anchor="mt",
+    )
+    d.text(
+        (W // 2, 266 * S),
+        "One click captures the whole page — then crop, annotate, and save it.",
+        font=font(BODY, 17 * S),
+        fill=DIM,
+        anchor="mt",
+    )
+
+    # The stitch ladder, filling left to right — the same motif as the promo
+    # tile and the progress card the capture draws on the page.
+    rungs, span = 14, 26 * S
+    x0 = (W - (rungs * span - 8 * S)) // 2
+    for i in range(rungs):
+        x = x0 + i * span
+        d.rounded_rectangle((x, 306 * S, x + 18 * S, 310 * S), 2 * S, fill=AMBER if i < 9 else LINE)
+    return canvas
+
+
 def main() -> None:
     SHOTS.mkdir(parents=True, exist_ok=True)
     PROMO.mkdir(parents=True, exist_ok=True)
@@ -225,6 +272,8 @@ def main() -> None:
     print("wrote store/promo/small-tile.png  440x280")
     marquee().save(PROMO / "marquee.png")
     print("wrote store/promo/marquee.png  1400x560")
+    readme_banner().save(PROMO / "banner.png")
+    print("wrote store/promo/banner.png  2560x680 (shown at half)")
 
 
 if __name__ == "__main__":

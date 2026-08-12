@@ -1,8 +1,13 @@
-# Longshot — full page screenshot
+<h1 align="center">
+  <img src="store/promo/banner.png" alt="Longshot — full page screenshot" width="880">
+</h1>
 
-A browser extension (Manifest V3, Chrome and Firefox) that captures an entire web
-page in one click, then lets you crop, annotate, and save it as PNG, JPG, or PDF.
-No account, no server, no uploads — everything happens in the browser.
+<p align="center">
+  A browser extension (Manifest V3, Chrome and Firefox) that captures an entire web
+  page in one click, then lets you crop, annotate, and save it as PNG, JPG, or PDF.
+  <br>
+  No account, no server, no uploads — everything happens in the browser.
+</p>
 
 ![The editor holding a full-page capture](store/screenshots/02-editor-annotated.png)
 
@@ -189,6 +194,12 @@ That writes six numbered slides to `store/screenshots/`. The Chrome Web Store
 takes five at most, so it gets `01`–`05`; AMO sets no practical limit and takes
 all six.
 
+The same script draws the brand images from `icons/icon-512.png` and the
+League Spartan wordmark, so they cannot drift from the icon: the two promo
+tiles, and `store/promo/banner.png` — the header at the top of this file, drawn
+at 2× and shown at half so it stays sharp on a HiDPI screen. Changing the icon
+means re-running `tools/make_icons.py` and then this.
+
 ## How the capture works
 
 ```
@@ -223,7 +234,7 @@ and page zoom correct without guessing.
 | `src/shared/` | Settings, message catalogues, file name templates, the PDF writer, browser compat shims |
 | `docs/` | The published privacy policy page |
 | `tools/` | Icons, store assets, build, smoke test, locale check |
-| `store/` | Listing copy for both stores, privacy policy, generated store images |
+| `store/` | Listing copy for both stores, privacy policy, generated brand and store images |
 | `.github/workflows/` | CI on every push; release and publish on every tag |
 
 ## Licence
